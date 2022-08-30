@@ -1,0 +1,25 @@
+{
+  "name": "sql",
+  "version": "1.0.0",
+  "description": "Simple relational database written in Rust.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cargo watch -x \"run --bin sql\"",
+    "fmt": "rustfmt ./src/main.rs",
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AhmedIbrahim336/sql.git"
+  },
+  "keywords": [
+    "SQL",
+    "Database",
+    "Rust"
+  ],
+  "author": "Ahmed Ibrahim",
+  "license": "MIT ",
+  "bugs": {
+    "url": "https://github.com/AhmedIbrahim336/sql/issues"
+  },
+  "homepage": "https://github.com/AhmedIbrahim336/sql#readme"
+}
