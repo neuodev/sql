@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use crate::{
     database::{Database, DatabaseError},
-    utils::get_db_path,
+    utils::{get_db_path, schema_file, table_file},
     DB_DIR,
 };
 
@@ -21,6 +21,8 @@ pub enum TableError {
     IoErr(#[from] io::Error),
     #[error("Invalid JSON")]
     SerializationErr(#[from] serde_json::Error),
+    #[error("Table not found")]
+    NotFond(String),
 }
 
 // Todo: Add table builder
@@ -48,5 +50,29 @@ impl<'a> Table<'a> {
         Database::exists_or_err(self.db)?;
 
         Ok(())
+    }
+
+    fn read(&self) -> Result<(), TableError> {
+        self.exists_or_err()?;
+
+        Ok(())
+    }
+
+    fn exist(&self) -> bool {
+        let db_dir = get_db_path(self.db);
+        let schema = db_dir.join(schema_file(self.table_name));
+        let table = db_dir.join(table_file(self.table_name));
+
+        schema.exists() && table.exists()
+    }
+
+    fn exists_or_err(&self) -> Result<(), TableError> {
+        Database::exists_or_err(self.db)?;
+
+        if !self.exist() {
+            Err(TableError::NotFond(self.table_name.to_string()))
+        } else {
+            Ok(())
+        }
     }
 }

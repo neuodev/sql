@@ -35,7 +35,7 @@ fn main() -> Result<(), ErrorWrapper> {
         ("id", "1"),
     ]))];
 
-    users_table.insert(&users);
+    users_table.insert(&users)?;
     // Database::drop_db(db_name)?;
 
     Ok(())

@@ -8,3 +8,11 @@ pub fn get_db_path(name: &str) -> PathBuf {
 
     db_dir
 }
+
+pub fn schema_file(file: &str) -> String {
+    format!("{}.schema.json", file)
+}
+
+pub fn table_file(file: &str) -> String {
+    format!("{}.json", file)
+}
