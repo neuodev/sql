@@ -20,8 +20,8 @@ Simple relational database written in **Rust**.
    - Truncate table 🚧
    - Alter table 🚧
 3. Query
-   - Insert into table 🚧
-   - Insert validation 🚧
+   - Insert into table ✅ (With validation 🚧)
+   - Query
 
 ## Commands
 
