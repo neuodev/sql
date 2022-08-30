@@ -19,11 +19,11 @@ enum ErrorWrapper {
 
 fn main() -> Result<(), ErrorWrapper> {
     let db_name = "stats";
-    Database::new(db_name)?;
-    let users_table = Table::new(db_name, "users");
+    // Database::new(db_name)?;
+    let users_table = Table::new(db_name, "users")?;
     let cols = vec![("name", "varchar"), ("age", "int")];
     users_table.create(&cols)?;
-    Database::drop_db(db_name)?;
+    // Database::drop_db(db_name)?;
 
     Ok(())
 }
