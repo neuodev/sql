@@ -1,5 +1,5 @@
-use serde_json::{json, Map, Value};
-use std::{fs, io, path::Path};
+use serde_json::{json, Value};
+use std::{collections::HashMap, fs, io, path::Path};
 use thiserror::Error;
 
 use crate::{
@@ -29,16 +29,8 @@ impl<'a> Table<'a> {
         Database::exists_or_err(db)?;
         Ok(Self { db, table_name })
     }
-    pub fn create(&self, cols: &Vec<(&str, &str)>) -> Result<(), TableError> {
-        // Should create the [tablename].schema.json
-
-        let mut map = Map::new();
-
-        cols.iter().for_each(|(key, value)| {
-            map.insert(key.to_string(), Value::String(value.to_string()));
-        });
-
-        let fields = json!({ "fields": Value::Object(map) });
+    pub fn create(&self, cols: &HashMap<&str, &str>) -> Result<(), TableError> {
+        let fields = json!({ "fields": cols });
         let fields = serde_json::to_string_pretty(&fields)?;
 
         Database::exists_or_err(self.db)?;
