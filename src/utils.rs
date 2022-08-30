@@ -16,3 +16,13 @@ pub fn schema_file(file: &str) -> String {
 pub fn table_file(file: &str) -> String {
     format!("{}.json", file)
 }
+
+pub fn get_schema_path(db: &str, table: &str) -> PathBuf {
+    let db_dir = get_db_path(db);
+    db_dir.join(schema_file(table))
+}
+
+pub fn get_table_path(db: &str, table: &str) -> PathBuf {
+    let db_dir = get_db_path(db);
+    db_dir.join(table_file(table))
+}

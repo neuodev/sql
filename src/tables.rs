@@ -1,11 +1,10 @@
-use serde_json::{json, Value};
-use std::{collections::HashMap, fs, io, path::Path};
+use serde_json::json;
+use std::{collections::HashMap, fs, io};
 use thiserror::Error;
 
 use crate::{
     database::{Database, DatabaseError},
     utils::{get_db_path, schema_file, table_file},
-    DB_DIR,
 };
 
 pub struct Table<'a> {
