@@ -8,18 +8,20 @@ Simple relational database written in **Rust**.
 
 ## Featrues
 
-1. Database
+1. General
+   - Support common data types
+2. Database
    - Create DB ✅
    - Drop DB ✅
    - Update DB Name 🚧
-2. Tables
+3. Tables
    - Create table ✅
    - Define table schema ✅
    - Validate table schema 🚧
    - Drop table 🚧
    - Truncate table 🚧
    - Alter table 🚧
-3. Query
+4. Query
    - Insert into table ✅ (With validation 🚧)
    - Query
 

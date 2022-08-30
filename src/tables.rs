@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::{collections::HashMap, fs, io};
 use thiserror::Error;
@@ -56,6 +57,12 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
+    pub fn alter(&self) {
+        // Update schema
+
+        // Todo: Update the actual table
+    }
+
     pub fn drop(&self) -> Result<(), TableError> {
         self.exists_or_err()?;
 
@@ -90,6 +97,23 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
+    fn read_scheam(&self) -> Result<Schema, TableError> {
+        self.exists_or_err()?;
+        let schema = get_schema_path(self);
+
+        let content = fs::read_to_string(schema)?;
+
+        Ok(serde_json::from_str(&content)?)
+    }
+
+    fn write_schema(&self, schema: Schema) -> Result<(), TableError> {
+        self.exists_or_err()?;
+        let path = get_schema_path(self);
+        let schema = json!(schema);
+        fs::write(path, serde_json::to_string_pretty(&schema)?)?;
+        Ok(())
+    }
+
     fn exist(&self) -> bool {
         let schema = get_schema_path(self);
         let table = get_table_path(self);
@@ -105,4 +129,9 @@ impl<'a> Table<'a> {
             Ok(())
         }
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Schema {
+    fields: HashMap<String, String>,
 }
