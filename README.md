@@ -2,6 +2,10 @@
 
 Simple relational database written in **Rust**.
 
+<p align='center'>
+    <img src="./sql.png" title="SQL" alt="SQL"/>
+</p>
+
 ## Featrues
 
 1. CRUD on tables
