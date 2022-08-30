@@ -2,7 +2,7 @@
 use std::{fs, io, path::Path};
 use thiserror::Error;
 
-use crate::DB_DIR;
+use crate::{utils::get_db_path, DB_DIR};
 
 #[derive(Error, Debug)]
 pub enum DatabaseError {
@@ -36,5 +36,18 @@ impl Database {
         }
         fs::remove_dir(db_dir)?;
         Ok(())
+    }
+
+    pub fn exists(name: &str) -> bool {
+        let path = get_db_path(name);
+        path.exists()
+    }
+
+    pub fn exists_or_err(name: &str) -> Result<(), DatabaseError> {
+        if !Database::exists(name) {
+            Err(DatabaseError::NotFound(name.to_string()))
+        } else {
+            Ok(())
+        }
     }
 }
