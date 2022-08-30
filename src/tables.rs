@@ -56,6 +56,23 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
+    pub fn drop(&self) -> Result<(), TableError> {
+        self.exists_or_err()?;
+
+        let schema = get_schema_path(self);
+        let table = get_table_path(self);
+
+        fs::remove_file(schema)?;
+        fs::remove_file(table)?;
+
+        Ok(())
+    }
+
+    pub fn truncate(&self) -> Result<(), TableError> {
+        self.write(&vec![])?;
+        Ok(())
+    }
+
     fn read(&self) -> Result<TableEntries, TableError> {
         self.exists_or_err()?;
         let table = get_table_path(self);
