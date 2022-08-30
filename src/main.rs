@@ -15,7 +15,9 @@ enum ErrorWrapper {
 }
 
 fn main() -> Result<(), ErrorWrapper> {
-    Database::new("stats")?;
+    let db_name = "stats";
+    Database::drop_db(db_name)?;
+    Database::new(db_name)?;
 
     Ok(())
 }

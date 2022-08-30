@@ -31,7 +31,7 @@ impl Database {
             return Err(DatabaseError::NotFound(name.to_string()));
         }
 
-        fs::remove_dir(name)?;
+        fs::remove_dir(db_dir)?;
 
         Ok(())
     }
