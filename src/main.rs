@@ -38,7 +38,10 @@ fn main() -> Result<(), ErrorWrapper> {
     users_table.insert(&users)?;
 
     // users_table.drop()?;
-    users_table.truncate()?;
+    // users_table.truncate()?;
+
+    // users_table.add_col("is_married", "pending")?;
+    // users_table.remove_col("is_married")?;
     // Database::drop_db(db_name)?;
 
     Ok(())

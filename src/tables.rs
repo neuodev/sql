@@ -65,7 +65,7 @@ impl<'a> Table<'a> {
         // Todo: Update the actual table
     }
 
-    pub fn drop(&self) -> TableResult<T> {
+    pub fn drop(&self) -> TableResult<()> {
         self.exists_or_err()?;
 
         let schema = get_schema_path(self);
@@ -84,7 +84,15 @@ impl<'a> Table<'a> {
 
     pub fn add_col(&self, col_name: &str, col_type: &str) -> TableResult<()> {
         let mut schema = self.read_schema()?;
+        schema.fields.insert(col_name.into(), col_type.into());
+        self.write_schema(schema)?;
+        Ok(())
+    }
 
+    pub fn remove_col<T: Into<String>>(&self, col_name: T) -> TableResult<()> {
+        let mut schema = self.read_schema()?;
+        schema.fields.remove_entry(&col_name.into());
+        self.write_schema(schema)?;
         Ok(())
     }
 
