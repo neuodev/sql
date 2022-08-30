@@ -4,7 +4,7 @@ mod utils;
 
 use database::{Database, DatabaseError};
 
-use tables::Table;
+use tables::{Table, TableError};
 use thiserror::Error;
 
 pub const DB_DIR: &str = "./sql";
@@ -13,6 +13,8 @@ pub const DB_DIR: &str = "./sql";
 enum ErrorWrapper {
     #[error("DB Error")]
     DatabaseError(#[from] DatabaseError),
+    #[error("TAble Error")]
+    TableError(#[from] TableError),
 }
 
 fn main() -> Result<(), ErrorWrapper> {
@@ -20,7 +22,7 @@ fn main() -> Result<(), ErrorWrapper> {
     Database::new(db_name)?;
     let users_table = Table::new(db_name, "users");
     let cols = vec![("name", "varchar"), ("age", "int")];
-    users_table.create(&cols);
+    users_table.create(&cols)?;
     Database::drop_db(db_name)?;
 
     Ok(())
