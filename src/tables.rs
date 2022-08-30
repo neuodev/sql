@@ -29,6 +29,7 @@ impl<'a> Table<'a> {
         Database::exists_or_err(db)?;
         Ok(Self { db, table_name })
     }
+
     pub fn create(&self, cols: &HashMap<&str, &str>) -> Result<(), TableError> {
         let fields = json!({ "fields": cols });
         let fields = serde_json::to_string_pretty(&fields)?;
@@ -40,6 +41,12 @@ impl<'a> Table<'a> {
         let table_file = db_path.join(format!("{}.json", self.table_name));
         fs::write(schema_file, fields.as_bytes())?;
         fs::write(table_file, "[]")?;
+        Ok(())
+    }
+
+    pub fn insert(&self, entries: &Vec<HashMap<&str, &str>>) -> Result<(), TableError> {
+        Database::exists_or_err(self.db)?;
+
         Ok(())
     }
 }

@@ -21,6 +21,7 @@ Simple relational database written in **Rust**.
    - Alter table 🚧
 3. Query
    - Insert into table 🚧
+   - Insert validation 🚧
 
 ## Commands
 

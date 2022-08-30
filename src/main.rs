@@ -2,7 +2,7 @@ mod database;
 mod tables;
 mod utils;
 
-use std::collections::HashMap;
+use std::{array::IntoIter, collections::HashMap};
 
 use database::{Database, DatabaseError};
 
@@ -28,6 +28,14 @@ fn main() -> Result<(), ErrorWrapper> {
     cols.insert("id", "int");
     cols.insert("age", "int");
     users_table.create(&cols)?;
+
+    let users = vec![HashMap::<_, _>::from_iter(IntoIter::new([
+        ("name", "Jone"),
+        ("age", "1"),
+        ("id", "1"),
+    ]))];
+
+    users_table.insert(&users);
     // Database::drop_db(db_name)?;
 
     Ok(())
