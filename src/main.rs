@@ -1,5 +1,6 @@
 mod database;
 mod query_parser;
+mod regex;
 mod tables;
 mod utils;
 
