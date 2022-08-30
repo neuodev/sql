@@ -27,14 +27,16 @@ pub enum TableError {
     NotFond(String),
 }
 
+type TableResult<T> = Result<T, TableError>;
+
 // Todo: Add table builder
 impl<'a> Table<'a> {
-    pub fn new(db: &'a str, table_name: &'a str) -> Result<Self, TableError> {
+    pub fn new(db: &'a str, table_name: &'a str) -> TableResult<Self> {
         Database::exists_or_err(db)?;
         Ok(Self { db, table_name })
     }
 
-    pub fn create(&self, cols: &HashMap<&str, &str>) -> Result<(), TableError> {
+    pub fn create(&self, cols: &HashMap<&str, &str>) -> TableResult<()> {
         let fields = json!({ "fields": cols });
         let fields = serde_json::to_string_pretty(&fields)?;
 
@@ -48,7 +50,7 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
-    pub fn insert(&self, entries: &TableEntries) -> Result<(), TableError> {
+    pub fn insert(&self, entries: &TableEntries) -> TableResult<()> {
         Database::exists_or_err(self.db)?;
         let mut all_entries = self.read()?;
         println!("[{}@{}] {:?}", self.table_name, self.db, all_entries.len());
@@ -63,7 +65,7 @@ impl<'a> Table<'a> {
         // Todo: Update the actual table
     }
 
-    pub fn drop(&self) -> Result<(), TableError> {
+    pub fn drop(&self) -> TableResult<T> {
         self.exists_or_err()?;
 
         let schema = get_schema_path(self);
@@ -80,6 +82,12 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
+    pub fn add_col(&self, col_name: &str, col_type: &str) -> TableResult<()> {
+        let mut schema = self.read_schema()?;
+
+        Ok(())
+    }
+
     fn read(&self) -> Result<TableEntries, TableError> {
         self.exists_or_err()?;
         let table = get_table_path(self);
@@ -89,7 +97,7 @@ impl<'a> Table<'a> {
         Ok(serde_json::from_str(&content)?)
     }
 
-    fn write(&self, entries: &TableEntries) -> Result<(), TableError> {
+    fn write(&self, entries: &TableEntries) -> TableResult<()> {
         self.exists_or_err()?;
         let table = get_table_path(self);
         let entries = json!(entries);
@@ -97,7 +105,7 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
-    fn read_scheam(&self) -> Result<Schema, TableError> {
+    fn read_schema(&self) -> TableResult<Schema> {
         self.exists_or_err()?;
         let schema = get_schema_path(self);
 
@@ -106,7 +114,7 @@ impl<'a> Table<'a> {
         Ok(serde_json::from_str(&content)?)
     }
 
-    fn write_schema(&self, schema: Schema) -> Result<(), TableError> {
+    fn write_schema(&self, schema: Schema) -> TableResult<()> {
         self.exists_or_err()?;
         let path = get_schema_path(self);
         let schema = json!(schema);
@@ -120,7 +128,7 @@ impl<'a> Table<'a> {
         schema.exists() && table.exists()
     }
 
-    fn exists_or_err(&self) -> Result<(), TableError> {
+    fn exists_or_err(&self) -> TableResult<()> {
         Database::exists_or_err(self.db)?;
 
         if !self.exist() {
