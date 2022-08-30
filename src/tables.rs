@@ -37,9 +37,9 @@ impl<'a> Table<'a> {
 
         let db_path = get_db_path(self.db);
         let schema_file = db_path.join(format!("{}.schema.json", self.table_name));
-
+        let table_file = db_path.join(format!("{}.json", self.table_name));
         fs::write(schema_file, fields.as_bytes())?;
-
+        fs::write(table_file, "[]")?;
         Ok(())
     }
 }
