@@ -29,10 +29,10 @@ fn main() -> Result<(), ErrorWrapper> {
     cols.insert("age", "int");
     users_table.create(&cols)?;
 
-    let users = vec![HashMap::<_, _>::from_iter(IntoIter::new([
-        ("name", "Jone"),
-        ("age", "1"),
-        ("id", "1"),
+    let users = vec![HashMap::<String, String>::from_iter(IntoIter::new([
+        ("name".into(), "Jone".into()),
+        ("age".into(), "1".into()),
+        ("id".into(), "1".into()),
     ]))];
 
     users_table.insert(&users)?;

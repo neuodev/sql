@@ -4,8 +4,10 @@ use thiserror::Error;
 
 use crate::{
     database::{Database, DatabaseError},
-    utils::{get_db_path, schema_file, table_file},
+    utils::{get_db_path, get_schema_path, get_table_path, schema_file, table_file},
 };
+
+type TableEntries = Vec<HashMap<String, String>>;
 
 pub struct Table<'a> {
     pub db: &'a str,
@@ -45,23 +47,35 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
-    pub fn insert(&self, entries: &Vec<HashMap<&str, &str>>) -> Result<(), TableError> {
+    pub fn insert(&self, entries: &TableEntries) -> Result<(), TableError> {
         Database::exists_or_err(self.db)?;
-
+        let mut all_entries = self.read()?;
+        println!("[{}@{}] {:?}", self.table_name, self.db, all_entries.len());
+        all_entries.extend(entries.clone());
+        self.write(&all_entries)?;
         Ok(())
     }
 
-    fn read(&self) -> Result<(), TableError> {
+    fn read(&self) -> Result<TableEntries, TableError> {
         self.exists_or_err()?;
+        let table = get_table_path(self);
 
+        let content = fs::read_to_string(table)?;
+
+        Ok(serde_json::from_str(&content)?)
+    }
+
+    fn write(&self, entries: &TableEntries) -> Result<(), TableError> {
+        self.exists_or_err()?;
+        let table = get_table_path(self);
+        let entries = json!(entries);
+        fs::write(table, entries.to_string())?;
         Ok(())
     }
 
     fn exist(&self) -> bool {
-        let db_dir = get_db_path(self.db);
-        let schema = db_dir.join(schema_file(self.table_name));
-        let table = db_dir.join(table_file(self.table_name));
-
+        let schema = get_schema_path(self);
+        let table = get_table_path(self);
         schema.exists() && table.exists()
     }
 

@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crate::DB_DIR;
+use crate::{tables::Table, DB_DIR};
 
 pub fn get_db_path(name: &str) -> PathBuf {
     let base_dir = Path::new(DB_DIR);
@@ -17,12 +17,12 @@ pub fn table_file(file: &str) -> String {
     format!("{}.json", file)
 }
 
-pub fn get_schema_path(db: &str, table: &str) -> PathBuf {
-    let db_dir = get_db_path(db);
-    db_dir.join(schema_file(table))
+pub fn get_schema_path(table: &Table) -> PathBuf {
+    let db_dir = get_db_path(table.db);
+    db_dir.join(schema_file(table.table_name))
 }
 
-pub fn get_table_path(db: &str, table: &str) -> PathBuf {
-    let db_dir = get_db_path(db);
-    db_dir.join(table_file(table))
+pub fn get_table_path(table: &Table) -> PathBuf {
+    let db_dir = get_db_path(table.db);
+    db_dir.join(table_file(table.table_name))
 }
