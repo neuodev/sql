@@ -1,4 +1,5 @@
 mod database;
+mod query_parser;
 mod tables;
 mod utils;
 
