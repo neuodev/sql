@@ -1,6 +1,8 @@
-use crate::{utils::get_db_path, DB_DIR};
+// use crate::{utils::get_db_path, DB_DIR};
 use std::{fs, io, path::Path};
 use thiserror::Error;
+
+use crate::DB_DIR;
 
 #[derive(Error, Debug)]
 pub enum DatabaseError {
@@ -15,7 +17,8 @@ pub enum DatabaseError {
 pub struct Database;
 impl Database {
     pub fn new(name: &str) -> Result<(), DatabaseError> {
-        let db_dir = get_db_path(name);
+        let base_dir = Path::new(DB_DIR);
+        let db_dir = base_dir.join(name);
         if db_dir.exists() {
             return Err(DatabaseError::DuplicatedDB(name.to_string()));
         }
@@ -25,14 +28,13 @@ impl Database {
     }
 
     pub fn drop_db(name: &str) -> Result<(), DatabaseError> {
-        let db_dir = get_db_path(name);
+        let base_dir = Path::new(DB_DIR);
+        let db_dir = base_dir.join(name);
 
         if !db_dir.exists() {
             return Err(DatabaseError::NotFound(name.to_string()));
         }
-
         fs::remove_dir(db_dir)?;
-
         Ok(())
     }
 }
