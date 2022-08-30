@@ -1,7 +1,8 @@
-use database::{Database, DatabaseError};
-
 mod database;
 mod tables;
+mod utils;
+
+use database::{Database, DatabaseError};
 
 use thiserror::Error;
 
