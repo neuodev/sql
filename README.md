@@ -68,9 +68,7 @@ Simple relational database written in **Rust**.
      ALTER COLUMN column_name datatype;
      ```
 
-### Query
-
-1. Select
+### Queries
 
 ```sql
 SELECT column1, column2, ...
