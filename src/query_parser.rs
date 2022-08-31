@@ -89,12 +89,14 @@ impl QueryParser {
 
 #[cfg(test)]
 mod tests {
-    use crate::query_parser::{DatabaseAction, Query};
+    use std::collections::HashMap;
+
+    use crate::query_parser::{DatabaseAction, Query, TableQuery};
 
     use super::QueryParser;
 
     #[test]
-    fn create_table() {
+    fn create_database() {
         let all_caps = QueryParser::parse("CREATE DATABASE demo").unwrap();
         let all_lowercase = QueryParser::parse("create database demo").unwrap();
 
@@ -116,7 +118,7 @@ mod tests {
     }
 
     #[test]
-    fn drop_table() {
+    fn drop_database() {
         let query = QueryParser::parse("DROP DATABASE demo").unwrap();
 
         assert_eq!(
@@ -129,7 +131,7 @@ mod tests {
     }
 
     #[test]
-    fn use_table() {
+    fn use_database() {
         let query = QueryParser::parse("USE DATABASE demo").unwrap();
 
         assert_eq!(
@@ -139,5 +141,16 @@ mod tests {
                 action: DatabaseAction::Use
             }
         );
+    }
+
+    #[test]
+    fn create_table() {
+        let query = QueryParser::parse("CREATE TABLE user(id int, name varchar, age int)").unwrap();
+        if let Query::Table(TableQuery::Create { table_name, cols }) = query {
+            assert_eq!(table_name, "user".to_string());
+            assert_eq!(cols.get("age").unwrap(), "int");
+            assert_eq!(cols.get("name").unwrap(), "varchar");
+            assert_eq!(cols.get("id").unwrap(), "int");
+        }
     }
 }
