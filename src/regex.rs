@@ -1,1 +1,1 @@
-pub const CREATE_DB: &str = "(?im)create database (?P<name>[^;]+)";
+pub const DB_REGEX: &str = r"(?im)(?P<action>[^\s;]+) database (?P<name>[^;]+)";

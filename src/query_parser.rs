@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use regex::Regex;
 
-use crate::regex::CREATE_DB;
+use crate::regex::DB_REGEX;
 
 pub type TableName = String;
 pub type ColName = String;
@@ -56,11 +56,21 @@ pub struct QueryParser;
 
 impl QueryParser {
     pub fn parse(raw: &str) -> Result<Query, &'static str> {
-        let re_create_db = Regex::new(CREATE_DB).unwrap();
-        if let Some(caps) = re_create_db.captures(raw) {
+        let re_db = Regex::new(DB_REGEX).unwrap();
+        if let Some(caps) = re_db.captures(raw) {
+            let db_name = caps["name"].to_string();
+            let action = &caps["action"];
+
+            let action = match action.to_lowercase().as_str() {
+                "create" => DatabaseAction::Create,
+                "drop" => DatabaseAction::Drop,
+                "use" => DatabaseAction::Use,
+                _ => return Err("Invalid database action"),
+            };
+
             return Ok(Query::Database {
                 name: caps["name"].to_string(),
-                action: DatabaseAction::Create,
+                action,
             });
         }
 
@@ -92,6 +102,19 @@ mod tests {
             Query::Database {
                 name: "demo".to_string(),
                 action: DatabaseAction::Create
+            }
+        );
+    }
+
+    #[test]
+    fn drop_table() {
+        let query = QueryParser::parse("DROP DATABASE demo").unwrap();
+
+        assert_eq!(
+            query,
+            Query::Database {
+                name: "demo".to_string(),
+                action: DatabaseAction::Drop
             }
         );
     }
