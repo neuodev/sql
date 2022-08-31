@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use regex::Regex;
 
-use crate::regex::DB_REGEX;
+use crate::regex::*;
 
 pub type TableName = String;
 pub type ColName = String;
@@ -56,7 +56,7 @@ pub struct QueryParser;
 
 impl QueryParser {
     pub fn parse(raw: &str) -> Result<Query, &'static str> {
-        let re_db = Regex::new(DB_REGEX).unwrap();
+        let re_db = Regex::new(RE_DB).unwrap();
         if let Some(caps) = re_db.captures(raw) {
             let name = caps["name"].to_string();
             let action = &caps["action"];
