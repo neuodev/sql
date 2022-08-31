@@ -58,7 +58,7 @@ impl QueryParser {
     pub fn parse(raw: &str) -> Result<Query, &'static str> {
         let re_db = Regex::new(DB_REGEX).unwrap();
         if let Some(caps) = re_db.captures(raw) {
-            let db_name = caps["name"].to_string();
+            let name = caps["name"].to_string();
             let action = &caps["action"];
 
             let action = match action.to_lowercase().as_str() {
@@ -68,10 +68,7 @@ impl QueryParser {
                 _ => return Err("Invalid database action"),
             };
 
-            return Ok(Query::Database {
-                name: caps["name"].to_string(),
-                action,
-            });
+            return Ok(Query::Database { name, action });
         }
 
         Err("Invalid query.")
@@ -115,6 +112,19 @@ mod tests {
             Query::Database {
                 name: "demo".to_string(),
                 action: DatabaseAction::Drop
+            }
+        );
+    }
+
+    #[test]
+    fn use_table() {
+        let query = QueryParser::parse("USE DATABASE demo").unwrap();
+
+        assert_eq!(
+            query,
+            Query::Database {
+                name: "demo".to_string(),
+                action: DatabaseAction::Use
             }
         );
     }
