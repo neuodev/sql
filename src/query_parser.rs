@@ -55,9 +55,9 @@ pub enum Query {
 pub struct QueryParser;
 
 impl QueryParser {
-    pub fn parse(raw: &str) -> Result<Query, &'static str> {
+    pub fn parse(query: &str) -> Result<Query, &'static str> {
         let re_db = Regex::new(RE_DB).unwrap();
-        if let Some(caps) = re_db.captures(raw) {
+        if let Some(caps) = re_db.captures(query) {
             let name = caps["name"].to_string();
             let action = &caps["action"];
 
@@ -69,6 +69,18 @@ impl QueryParser {
             };
 
             return Ok(Query::Database { name, action });
+        }
+
+        let re_create_table = Regex::new(RE_CREATE_TABLE).unwrap();
+        if let Some(caps) = re_create_table.captures(query) {
+            let table_name = caps["name"].to_string();
+            let re_entries = Regex::new(RE_TABLE_ENTRIES).unwrap();
+            let mut cols = HashMap::new();
+            re_entries.captures_iter(&caps["entries"]).for_each(|caps| {
+                cols.insert(caps["col_name"].into(), caps["col_type"].into());
+            });
+
+            return Ok(Query::Table(TableQuery::Create { table_name, cols }));
         }
 
         Err("Invalid query.")
