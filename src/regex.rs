@@ -14,3 +14,5 @@ pub const RE_DB: &str = r"(?im)(?P<action>[^\s;]+) database (?P<name>[^;]+)";
 pub const RE_CREATE_TABLE: &str = r"(?im)create table (?P<name>[^\(\s]+)(\s|)(?P<entries>[^;]+)";
 /// A regex to extract columns name and its types. intractive example [here](https://regex101.com/r/s6rTCW/1)
 pub const RE_TABLE_ENTRIES: &str = r"(?im)(?P<col_name>[^\s,\(]+) (?P<col_type>[^,\n;\)]+)";
+/// A regex to match `drop` or `truncate` table query. Example [here](https://regex101.com/r/9z6nW4/1)
+pub const RE_TABLE: &str = r"(?im)(?P<action>drop|truncate) table (?P<name>[^;]+)";
