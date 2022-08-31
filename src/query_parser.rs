@@ -144,13 +144,31 @@ mod tests {
     }
 
     #[test]
-    fn create_table() {
+    fn create_table_one_line_query() {
         let query = QueryParser::parse("CREATE TABLE user(id int, name varchar, age int)").unwrap();
         if let Query::Table(TableQuery::Create { table_name, cols }) = query {
             assert_eq!(table_name, "user".to_string());
             assert_eq!(cols.get("age").unwrap(), "int");
             assert_eq!(cols.get("name").unwrap(), "varchar");
             assert_eq!(cols.get("id").unwrap(), "int");
+        }
+    }
+
+    #[test]
+    fn create_table_multi_line_query() {
+        let query = QueryParser::parse(
+            r#"CREATE TABLE t_name (
+                column1 datatype,
+                column2 datatype,
+                column3 datatype,
+               );"#,
+        )
+        .unwrap();
+        if let Query::Table(TableQuery::Create { table_name, cols }) = query {
+            assert_eq!(table_name, "t_name".to_string());
+            assert_eq!(cols.get("column1").unwrap(), "datatype");
+            assert_eq!(cols.get("column2").unwrap(), "datatype");
+            assert_eq!(cols.get("column3").unwrap(), "datatype");
         }
     }
 }
