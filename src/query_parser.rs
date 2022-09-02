@@ -17,21 +17,12 @@ pub enum DatabaseAction {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum TableQuery {
-    Create {
-        table_name: String,
-        cols: HashMap<String, String>,
-    },
-    Drop(TableName),
-    Truncate(TableName),
-    AddCol {
-        col_name: String,
-        col_type: ColType,
-    },
+    Create { cols: HashMap<String, String> },
+    DropTable,
+    Truncate,
+    AddCol { col_name: String, col_type: ColType },
     DropCol(ColName),
-    AlterCol {
-        col_name: String,
-        col_type: ColType,
-    },
+    AlterCol { col_name: String, col_type: ColType },
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -40,7 +31,10 @@ pub enum Query {
         name: String,
         action: DatabaseAction,
     },
-    Table(TableQuery),
+    Table {
+        name: String,
+        query: TableQuery,
+    },
     Select {
         table_name: String,
         cols: Option<Vec<String>>,
@@ -80,7 +74,10 @@ impl QueryParser {
                 cols.insert(caps["col_name"].into(), caps["col_type"].into());
             });
 
-            return Ok(Query::Table(TableQuery::Create { table_name, cols }));
+            return Ok(Query::Table {
+                name: table_name,
+                query: TableQuery::Create { cols },
+            });
         }
 
         let re_table = Regex::new(RE_TABLE).unwrap();
@@ -88,10 +85,28 @@ impl QueryParser {
         if let Some(caps) = re_table.captures(query) {
             let table_name = caps["name"].to_string();
             match caps["action"].to_lowercase().as_str() {
-                "drop" => return Ok(Query::Table(TableQuery::Drop(table_name))),
-                "truncate" => return Ok(Query::Table(TableQuery::Truncate(table_name))),
+                "drop" => {
+                    return Ok(Query::Table {
+                        name: table_name,
+                        query: TableQuery::DropTable,
+                    })
+                }
+                "truncate" => {
+                    return Ok(Query::Table {
+                        name: table_name,
+                        query: TableQuery::Truncate,
+                    })
+                }
                 _ => {}
             };
+        }
+
+        let re_drop_col = Regex::new(RE_DROP_COL).unwrap();
+        if let Some(caps) = re_drop_col.captures(query) {
+            return Ok(Query::Table {
+                name: caps["table_name"].to_string(),
+                query: TableQuery::DropCol(caps["col_name"].to_string()),
+            });
         }
 
         Err("Invalid query.")
@@ -155,8 +170,12 @@ mod tests {
     #[test]
     fn create_table_one_line_query() {
         let query = QueryParser::parse("CREATE TABLE user(id int, name varchar, age int)").unwrap();
-        if let Query::Table(TableQuery::Create { table_name, cols }) = query {
-            assert_eq!(table_name, "user".to_string());
+        if let Query::Table {
+            name,
+            query: TableQuery::Create { cols },
+        } = query
+        {
+            assert_eq!(name, "user".to_string());
             assert_eq!(cols.get("age").unwrap(), "int");
             assert_eq!(cols.get("name").unwrap(), "varchar");
             assert_eq!(cols.get("id").unwrap(), "int");
@@ -175,8 +194,12 @@ mod tests {
                );"#,
         )
         .unwrap();
-        if let Query::Table(TableQuery::Create { table_name, cols }) = query {
-            assert_eq!(table_name, "t_name".to_string());
+        if let Query::Table {
+            name,
+            query: TableQuery::Create { cols },
+        } = query
+        {
+            assert_eq!(name, "t_name".to_string());
             assert_eq!(cols.get("column1").unwrap(), "datatype");
             assert_eq!(cols.get("column2").unwrap(), "datatype");
             assert_eq!(cols.get("column3").unwrap(), "datatype");
@@ -188,8 +211,12 @@ mod tests {
     #[test]
     fn drop_table() {
         let query = QueryParser::parse(r#"DROP TABLE demo"#).unwrap();
-        if let Query::Table(TableQuery::Drop(t_name)) = query {
-            assert_eq!(t_name, "demo".to_string());
+        if let Query::Table {
+            name,
+            query: TableQuery::DropTable,
+        } = query
+        {
+            assert_eq!(name, "demo".to_string());
         } else {
             panic!("Unexpted query")
         }
@@ -198,8 +225,28 @@ mod tests {
     #[test]
     fn truncate_table() {
         let query = QueryParser::parse(r#"TRUNCATE TABLE demo"#).unwrap();
-        if let Query::Table(TableQuery::Truncate(t_name)) = query {
-            assert_eq!(t_name, "demo".to_string());
+        if let Query::Table {
+            name,
+            query: TableQuery::Truncate,
+        } = query
+        {
+            assert_eq!(name, "demo".to_string());
+        } else {
+            panic!("Unexpted query")
+        }
+    }
+
+    #[test]
+    fn drop_col() {
+        let query = QueryParser::parse("ALTER TABLE demo DROP COLUMN id").unwrap();
+
+        if let Query::Table {
+            name,
+            query: TableQuery::DropCol(col),
+        } = query
+        {
+            assert_eq!(name, "demo".to_string());
+            assert_eq!(col, "id".to_string());
         } else {
             panic!("Unexpted query")
         }
