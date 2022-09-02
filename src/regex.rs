@@ -16,6 +16,6 @@ pub const RE_CREATE_TABLE: &str = r"(?im)create table (?P<name>[^\(\s]+)(\s|)(?P
 pub const RE_TABLE_ENTRIES: &str = r"(?im)(?P<col_name>[^\s,\(]+) (?P<col_type>[^,\n;\)]+)";
 /// A regex to match `drop` or `truncate` table query. Example [here](https://regex101.com/r/9z6nW4/1)
 pub const RE_TABLE: &str = r"(?im)(?P<action>drop|truncate) table (?P<name>[^;]+)";
-/// A regex to match drop column query
+/// A regex to match drop column query. [Example](https://regex101.com/r/fM8Csp/1)
 pub const RE_DROP_COL: &str =
     r"(?im)ALTER TABLE (?P<table_name>[^\s\n]+) drop column (?P<col_name>[^\s\n;]+)";
