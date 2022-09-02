@@ -19,3 +19,5 @@ pub const RE_TABLE: &str = r"(?im)(?P<action>drop|truncate) table (?P<name>[^;]+
 /// A regex to match drop column query. [Example](https://regex101.com/r/fM8Csp/1)
 pub const RE_DROP_COL: &str =
     r"(?im)ALTER TABLE (?P<table_name>[^\s\n]+) drop column (?P<col_name>[^\s\n;]+)";
+/// A regex to match alter  column query. [Example](https://regex101.com/r/KAcjsB/1)
+pub const RE_ALTER_COL: &str = r"(?im)ALTER TABLE (?P<table_name>[^\s\n]+) alter column (?P<col_name>[^\s\n;]+) (?P<datatype>[^\n;]+)";
