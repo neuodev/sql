@@ -21,3 +21,6 @@ pub const RE_DROP_COL: &str =
     r"(?im)ALTER TABLE (?P<table_name>[^\s\n]+) drop column (?P<col_name>[^\s\n;]+)";
 /// A regex to match alter  column query. [Example](https://regex101.com/r/KAcjsB/1)
 pub const RE_ALTER_COL: &str = r"(?im)ALTER TABLE (?P<table_name>[^\s\n]+) alter column (?P<col_name>[^\s\n;]+) (?P<datatype>[^\n;]+)";
+/// A regex to match add column query. [Example](https://regex101.com/r/jcpHYb/1)
+pub const RE_ADD_COL: &str =
+    r"(?im)ALTER TABLE (?P<table_name>[^\s\n]+) add (?P<col_name>[^\s\n]+) (?P<datatype>[^\s\n;]+)";

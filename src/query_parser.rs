@@ -20,9 +20,9 @@ pub enum TableQuery {
     Create { cols: HashMap<String, String> },
     DropTable,
     Truncate,
-    AddCol { col_name: String, col_type: ColType },
-    DropCol(ColName),
+    AddCol { col_name: String, datatype: ColType },
     AlterCol { col_name: String, datatype: ColType },
+    DropCol(ColName),
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -114,6 +114,17 @@ impl QueryParser {
             return Ok(Query::Table {
                 name: caps["table_name"].to_string(),
                 query: TableQuery::AlterCol {
+                    col_name: caps["col_name"].to_string(),
+                    datatype: caps["datatype"].to_string(),
+                },
+            });
+        }
+
+        let re_add_col = Regex::new(RE_ADD_COL).unwrap();
+        if let Some(caps) = re_add_col.captures(query) {
+            return Ok(Query::Table {
+                name: caps["table_name"].to_string(),
+                query: TableQuery::AddCol {
                     col_name: caps["col_name"].to_string(),
                     datatype: caps["datatype"].to_string(),
                 },
@@ -270,6 +281,23 @@ mod tests {
         if let Query::Table {
             name,
             query: TableQuery::AlterCol { col_name, datatype },
+        } = query
+        {
+            assert_eq!(name, "demo".to_string());
+            assert_eq!(col_name, "id".to_string());
+            assert_eq!(datatype, "uuid".to_string());
+        } else {
+            panic!("Unexpted query")
+        }
+    }
+
+    #[test]
+    fn add_col() {
+        let query = QueryParser::parse("ALTER TABLE demo ADD id uuid").unwrap();
+
+        if let Query::Table {
+            name,
+            query: TableQuery::AddCol { col_name, datatype },
         } = query
         {
             assert_eq!(name, "demo".to_string());
