@@ -425,4 +425,35 @@ mod tests {
             panic!("Unexpted query")
         }
     }
+
+    #[test]
+    fn insert_statment_with_cols_and_many_value() {
+        let query = QueryParser::parse(
+            "INSERT INTO table_name (a,b) VALUES(1,2),(3, 4),(5, 6);
+        ",
+        )
+        .unwrap();
+
+        let expected_values = vec![
+            vec!["1".to_string(), "2".to_string()],
+            vec!["3".to_string(), "4".to_string()],
+            vec!["5".to_string(), "6".to_string()],
+        ];
+
+        if let Query::Insert {
+            table_name,
+            cols,
+            values,
+        } = query
+        {
+            assert_eq!(table_name, "table_name".to_string());
+            assert_eq!(
+                cols,
+                SelectCols::Cols(vec!["a".to_string(), "b".to_string()])
+            );
+            assert_eq!(values, expected_values);
+        } else {
+            panic!("Unexpted query")
+        }
+    }
 }
