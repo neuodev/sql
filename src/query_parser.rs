@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use regex::Regex;
 
-use crate::regex::*;
+use crate::{regex::*, utils::getCols};
 
 pub type TableName = String;
 pub type ColName = String;
@@ -26,6 +26,12 @@ pub enum TableQuery {
 }
 
 #[derive(Debug, PartialEq, Eq)]
+pub enum SelectCols {
+    All,
+    Cols(Vec<String>),
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub enum Query {
     Database {
         name: String,
@@ -37,7 +43,8 @@ pub enum Query {
     },
     Select {
         table_name: String,
-        cols: Option<Vec<String>>,
+        cols: SelectCols,
+        condition: Option<String>,
     },
     Insert {
         table_name: String,
@@ -131,13 +138,26 @@ impl QueryParser {
             });
         }
 
+        let re_select = Regex::new(RE_SELECT).unwrap();
+        if let Some(caps) = re_select.captures(query) {
+            let condition = caps
+                .name("condition")
+                .map(|_| caps["condition"].to_string());
+
+            return Ok(Query::Select {
+                table_name: caps["table_name"].to_string(),
+                condition,
+                cols: getCols(&caps["cols"]),
+            });
+        }
+
         Err("Invalid query.")
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::query_parser::{DatabaseAction, Query, TableQuery};
+    use crate::query_parser::{DatabaseAction, Query, SelectCols, TableQuery};
 
     use super::QueryParser;
 
@@ -303,6 +323,42 @@ mod tests {
             assert_eq!(name, "demo".to_string());
             assert_eq!(col_name, "id".to_string());
             assert_eq!(datatype, "uuid".to_string());
+        } else {
+            panic!("Unexpted query")
+        }
+    }
+
+    #[test]
+    fn parse_select_statment_with_condition() {
+        let query = QueryParser::parse("SELECT id,name FROM user WHERE age=12").unwrap();
+
+        if let Query::Select {
+            table_name,
+            cols,
+            condition,
+        } = query
+        {
+            assert_eq!(table_name, "user".to_string());
+            assert_eq!(cols, SelectCols::Cols(vec!["id".into(), "name".into()]));
+            assert!(condition.is_some());
+            assert_eq!(condition.unwrap(), "age=12");
+        } else {
+            panic!("Unexpted query")
+        }
+    }
+    #[test]
+    fn parse_select_statment() {
+        let query = QueryParser::parse("SELECT id,name FROM user").unwrap();
+
+        if let Query::Select {
+            table_name,
+            cols,
+            condition,
+        } = query
+        {
+            assert_eq!(table_name, "user".to_string());
+            assert_eq!(cols, SelectCols::Cols(vec!["id".into(), "name".into()]));
+            assert!(condition.is_none());
         } else {
             panic!("Unexpted query")
         }
