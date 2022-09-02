@@ -48,8 +48,8 @@ pub enum Query {
     },
     Insert {
         table_name: String,
-        cols: Option<Vec<String>>,
-        values: Vec<String>,
+        cols: SelectCols,
+        values: Vec<Vec<String>>,
     },
 }
 
@@ -140,6 +140,19 @@ impl QueryParser {
 
         let re_select = Regex::new(RE_SELECT).unwrap();
         if let Some(caps) = re_select.captures(query) {
+            let condition = caps
+                .name("condition")
+                .map(|_| caps["condition"].to_string());
+
+            return Ok(Query::Select {
+                table_name: caps["table_name"].to_string(),
+                condition,
+                cols: getCols(&caps["cols"]),
+            });
+        }
+
+        let re_insert = Regex::new(RE_INSERT).unwrap();
+        if let Some(caps) = re_insert.captures(query) {
             let condition = caps
                 .name("condition")
                 .map(|_| caps["condition"].to_string());
@@ -359,6 +372,55 @@ mod tests {
             assert_eq!(table_name, "user".to_string());
             assert_eq!(cols, SelectCols::Cols(vec!["id".into(), "name".into()]));
             assert!(condition.is_none());
+        } else {
+            panic!("Unexpted query")
+        }
+    }
+
+    #[test]
+    fn insert_statment_with_no_cols_and_one_value() {
+        let query = QueryParser::parse("INSERT INTO table_name VALUES (value1, value2);").unwrap();
+
+        if let Query::Insert {
+            table_name,
+            cols,
+            values,
+        } = query
+        {
+            assert_eq!(table_name, "table_name".to_string());
+            assert_eq!(cols, SelectCols::All);
+            assert_eq!(
+                values,
+                vec![vec!["value1".to_string(), "value2".to_string()]]
+            );
+        } else {
+            panic!("Unexpted query")
+        }
+    }
+
+    #[test]
+    fn insert_statment_with_no_cols_and_many_value() {
+        let query = QueryParser::parse(
+            "INSERT INTO user VALUES (val1, val2), (val3, val4) (val5, val6);
+        ",
+        )
+        .unwrap();
+
+        let expected_values = vec![
+            vec!["val1".to_string(), "val2".to_string()],
+            vec!["val3".to_string(), "val4".to_string()],
+            vec!["val5".to_string(), "val6".to_string()],
+        ];
+
+        if let Query::Insert {
+            table_name,
+            cols,
+            values,
+        } = query
+        {
+            assert_eq!(table_name, "table_name".to_string());
+            assert_eq!(cols, SelectCols::All);
+            assert_eq!(values, expected_values);
         } else {
             panic!("Unexpted query")
         }

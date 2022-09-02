@@ -25,6 +25,10 @@ pub const RE_ALTER_COL: &str = r"(?im)ALTER TABLE (?P<table_name>[^\s\n]+) alter
 pub const RE_ADD_COL: &str =
     r"(?im)ALTER TABLE (?P<table_name>[^\s\n]+) add (?P<col_name>[^\s\n]+) (?P<datatype>[^\s\n;]+)";
 
-/// A regex to match basic select queries with conditions query. [Example](https://regex101.com/r/FhdTBh/1)
+/// A regex to match basic select queries with conditions. [Example](https://regex101.com/r/FhdTBh/1)
 pub const RE_SELECT: &str =
     r"(?im)select (?P<cols>.+) from (?P<table_name>[^\s;\n]+)( where (?P<condition>[^\n;]+))?";
+
+/// A regex to match complex insert queries. [Example](https://regex101.com/r/uAZ6Uo/1)
+pub const RE_INSERT: &str =
+    r"(?im)INSERT INTO (?P<table_name>[^\s\n;]+)(?P<cols>.+)? values\s?(?P<values>\(.+\))";
