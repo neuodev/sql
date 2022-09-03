@@ -20,12 +20,31 @@ pub enum DatabaseAction {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum TableQuery {
-    Create { cols: HashMap<String, String> },
+    Create {
+        cols: HashMap<String, String>,
+    },
     DropTable,
     Truncate,
-    AddCol { col_name: String, datatype: ColType },
-    AlterCol { col_name: String, datatype: ColType },
+    AddCol {
+        col_name: String,
+        datatype: ColType,
+    },
+    AlterCol {
+        col_name: String,
+        datatype: ColType,
+    },
     DropCol(ColName),
+    Select {
+        cols: SelectCols,
+        condition: Option<String>,
+    },
+    Insert {
+        cols: SelectCols,
+        values: Vec<Vec<String>>,
+    },
+    Delete {
+        condition: String,
+    },
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -43,16 +62,6 @@ pub enum Query {
     Table {
         name: String,
         query: TableQuery,
-    },
-    Select {
-        table_name: String,
-        cols: SelectCols,
-        condition: Option<String>,
-    },
-    Insert {
-        table_name: String,
-        cols: SelectCols,
-        values: Vec<Vec<String>>,
     },
 }
 
@@ -147,10 +156,12 @@ impl QueryParser {
                 .name("condition")
                 .map(|_| caps["condition"].to_string());
 
-            return Ok(Query::Select {
-                table_name: caps["table_name"].to_string(),
-                condition,
-                cols: getCols(&caps["cols"]),
+            return Ok(Query::Table {
+                name: caps["table_name"].to_string(),
+                query: TableQuery::Select {
+                    condition,
+                    cols: getCols(&caps["cols"]),
+                },
             });
         }
 
@@ -167,10 +178,19 @@ impl QueryParser {
                 .map(|caps| get_comma_separated_values(&caps["row"]))
                 .collect::<Vec<Vec<_>>>();
 
-            return Ok(Query::Insert {
-                table_name: caps["table_name"].to_string(),
-                cols,
-                values,
+            return Ok(Query::Table {
+                name: caps["table_name"].to_string(),
+                query: TableQuery::Insert { cols, values },
+            });
+        }
+
+        let re_delete = Regex::new(RE_DELETE_FROM_TABLE).unwrap();
+        if let Some(caps) = re_delete.captures(query) {
+            return Ok(Query::Table {
+                name: caps["table_name"].to_string(),
+                query: TableQuery::Delete {
+                    condition: caps["condition"].to_string(),
+                },
             });
         }
 
