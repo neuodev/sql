@@ -375,13 +375,12 @@ mod tests {
     fn parse_select_statment_with_condition() {
         let query = QueryParser::parse("SELECT id,name FROM user WHERE age=12").unwrap();
 
-        if let Query::Select {
-            table_name,
-            cols,
-            condition,
+        if let Query::Table {
+            name,
+            query: TableQuery::Select { cols, condition },
         } = query
         {
-            assert_eq!(table_name, "user".to_string());
+            assert_eq!(name, "user".to_string());
             assert_eq!(cols, SelectCols::Cols(vec!["id".into(), "name".into()]));
             assert!(condition.is_some());
             assert_eq!(condition.unwrap(), "age=12");
@@ -393,13 +392,12 @@ mod tests {
     fn parse_select_statment() {
         let query = QueryParser::parse("SELECT id,name FROM user").unwrap();
 
-        if let Query::Select {
-            table_name,
-            cols,
-            condition,
+        if let Query::Table {
+            name,
+            query: TableQuery::Select { cols, condition },
         } = query
         {
-            assert_eq!(table_name, "user".to_string());
+            assert_eq!(name, "user".to_string());
             assert_eq!(cols, SelectCols::Cols(vec!["id".into(), "name".into()]));
             assert!(condition.is_none());
         } else {
@@ -411,13 +409,12 @@ mod tests {
     fn insert_statment_with_no_cols_and_one_value() {
         let query = QueryParser::parse("INSERT INTO table_name VALUES (value1, value2);").unwrap();
 
-        if let Query::Insert {
-            table_name,
-            cols,
-            values,
+        if let Query::Table {
+            name,
+            query: TableQuery::Insert { cols, values },
         } = query
         {
-            assert_eq!(table_name, "table_name".to_string());
+            assert_eq!(name, "table_name".to_string());
             assert_eq!(cols, SelectCols::All);
             assert_eq!(
                 values,
@@ -442,13 +439,12 @@ mod tests {
             vec!["val5".to_string(), "val6".to_string()],
         ];
 
-        if let Query::Insert {
-            table_name,
-            cols,
-            values,
+        if let Query::Table {
+            name,
+            query: TableQuery::Insert { cols, values },
         } = query
         {
-            assert_eq!(table_name, "user".to_string());
+            assert_eq!(name, "user".to_string());
             assert_eq!(cols, SelectCols::All);
             assert_eq!(values, expected_values);
         } else {
@@ -470,13 +466,12 @@ mod tests {
             vec!["5".to_string(), "6".to_string()],
         ];
 
-        if let Query::Insert {
-            table_name,
-            cols,
-            values,
+        if let Query::Table {
+            name,
+            query: TableQuery::Insert { cols, values },
         } = query
         {
-            assert_eq!(table_name, "table_name".to_string());
+            assert_eq!(name, "table_name".to_string());
             assert_eq!(
                 cols,
                 SelectCols::Cols(vec!["a".to_string(), "b".to_string()])
