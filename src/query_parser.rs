@@ -161,11 +161,16 @@ impl QueryParser {
                 None => SelectCols::All,
             };
 
-            println!("{:?}", cols);
+            let re_values = Regex::new(RE_INSERT_VALUES_VALUES).unwrap();
+            let values = re_values
+                .captures_iter(&caps["values"])
+                .map(|caps| get_comma_separated_values(&caps["row"]))
+                .collect::<Vec<Vec<_>>>();
+
             return Ok(Query::Insert {
                 table_name: caps["table_name"].to_string(),
                 cols,
-                values: vec![vec![]],
+                values,
             });
         }
 
@@ -423,7 +428,7 @@ mod tests {
             values,
         } = query
         {
-            assert_eq!(table_name, "table_name".to_string());
+            assert_eq!(table_name, "user".to_string());
             assert_eq!(cols, SelectCols::All);
             assert_eq!(values, expected_values);
         } else {

@@ -35,3 +35,6 @@ pub const RE_INSERT: &str =
 
 /// A regex to match comma separated values. [Example](https://regex101.com/r/OiSrOW/1)
 pub const RE_COMMA_SEPARATED_VALUES: &str = r"(?im)(?P<value>[^,\(\)\s]+)";
+
+/// A regex to match insert query values like `(val1, val2), (val1, val2) (val1, val2);[`. [Example](https://regex101.com/r/mJUv6g/1)
+pub const RE_INSERT_VALUES_VALUES: &str = r"(?im)(?P<row>\([^\);]+\))";
