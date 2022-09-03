@@ -235,7 +235,7 @@ mod tests {
             assert_eq!(cols.get("name").unwrap(), "varchar");
             assert_eq!(cols.get("id").unwrap(), "int");
         } else {
-            panic!("Unexpted query");
+            panic!("Unexpected query");
         }
     }
 
@@ -259,7 +259,7 @@ mod tests {
             assert_eq!(cols.get("column2").unwrap(), "datatype");
             assert_eq!(cols.get("column3").unwrap(), "datatype");
         } else {
-            panic!("Unexpted query");
+            panic!("Unexpected query");
         }
     }
 
@@ -273,7 +273,7 @@ mod tests {
         {
             assert_eq!(name, "demo".to_string());
         } else {
-            panic!("Unexpted query")
+            panic!("Unexpected query")
         }
     }
 
@@ -356,7 +356,7 @@ mod tests {
             assert!(condition.is_some());
             assert_eq!(condition.unwrap(), "age=12");
         } else {
-            panic!("Unexpted query")
+            panic!("Unexpected query")
         }
     }
     #[test]
@@ -373,7 +373,7 @@ mod tests {
             assert_eq!(cols, SelectCols::Cols(vec!["id".into(), "name".into()]));
             assert!(condition.is_none());
         } else {
-            panic!("Unexpted query")
+            panic!("Unexpected query")
         }
     }
 
@@ -394,7 +394,7 @@ mod tests {
                 vec![vec!["value1".to_string(), "value2".to_string()]]
             );
         } else {
-            panic!("Unexpted query")
+            panic!("Unexpected query")
         }
     }
 
@@ -422,7 +422,7 @@ mod tests {
             assert_eq!(cols, SelectCols::All);
             assert_eq!(values, expected_values);
         } else {
-            panic!("Unexpted query")
+            panic!("Unexpected query")
         }
     }
 
@@ -453,7 +453,7 @@ mod tests {
             );
             assert_eq!(values, expected_values);
         } else {
-            panic!("Unexpted query")
+            panic!("Unexpected query")
         }
     }
 }
