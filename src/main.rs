@@ -1,14 +1,14 @@
 mod database;
 mod query_parser;
+mod query_planner;
 mod regex;
 mod tables;
 mod utils;
 
-use std::{array::IntoIter, collections::HashMap};
-
-use database::{Database, DatabaseError};
-
-use tables::{Table, TableError};
+use database::DatabaseError;
+use inquire::InquireError;
+use query_planner::QueryPlanner;
+use tables::TableError;
 use thiserror::Error;
 
 pub const DB_DIR: &str = "./sql";
@@ -17,34 +17,13 @@ pub const DB_DIR: &str = "./sql";
 enum ErrorWrapper {
     #[error("DB Error")]
     DatabaseError(#[from] DatabaseError),
-    #[error("TAble Error")]
+    #[error("Table Error")]
     TableError(#[from] TableError),
+    #[error("Error while getting std input")]
+    InputError(#[from] InquireError),
 }
 
 fn main() -> Result<(), ErrorWrapper> {
-    let db_name = "stats";
-    // Database::new(db_name)?;
-    let users_table = Table::new(db_name, "users")?;
-    let mut cols = HashMap::new();
-    cols.insert("name", "varchar");
-    cols.insert("id", "int");
-    cols.insert("age", "int");
-    users_table.create(&cols)?;
-
-    let users = vec![HashMap::<String, String>::from_iter(IntoIter::new([
-        ("name".into(), "Jone".into()),
-        ("age".into(), "1".into()),
-        ("id".into(), "1".into()),
-    ]))];
-
-    users_table.insert(&users)?;
-
-    // users_table.drop()?;
-    // users_table.truncate()?;
-
-    // users_table.add_col("is_married", "pending")?;
-    // users_table.remove_col("is_married")?;
-    // Database::drop_db(db_name)?;
-
+    QueryPlanner::init()?;
     Ok(())
 }
