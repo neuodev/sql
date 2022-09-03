@@ -153,14 +153,12 @@ impl QueryParser {
 
         let re_insert = Regex::new(RE_INSERT).unwrap();
         if let Some(caps) = re_insert.captures(query) {
-            let condition = caps
-                .name("condition")
-                .map(|_| caps["condition"].to_string());
-
-            return Ok(Query::Select {
+            let cols = caps.name("cols").map(|_| caps["cols"].to_string());
+            println!("{:?}", cols);
+            return Ok(Query::Insert {
                 table_name: caps["table_name"].to_string(),
-                condition,
                 cols: getCols(&caps["cols"]),
+                values: vec![vec![]],
             });
         }
 

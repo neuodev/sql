@@ -32,3 +32,6 @@ pub const RE_SELECT: &str =
 /// A regex to match complex insert queries. [Example](https://regex101.com/r/uAZ6Uo/1)
 pub const RE_INSERT: &str =
     r"(?im)INSERT INTO (?P<table_name>[^\s\n;]+)(?P<cols>.+)? values\s?(?P<values>\(.+\))";
+
+/// A regex to match coma seperated values. [Example](https://regex101.com/r/OiSrOW/1)
+pub const RE_COMA_SEPERATED_VALUES: &str = r"(?im)(?P<value>[^,\(\)\s]+)";
