@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use regex::Regex;
 
-use crate::{regex::*, utils::getCols};
+use crate::{
+    regex::*,
+    utils::{getCols, get_comma_separated_values},
+};
 
 pub type TableName = String;
 pub type ColName = String;
@@ -153,11 +156,15 @@ impl QueryParser {
 
         let re_insert = Regex::new(RE_INSERT).unwrap();
         if let Some(caps) = re_insert.captures(query) {
-            let cols = caps.name("cols").map(|_| caps["cols"].to_string());
+            let cols = match caps.name("cols") {
+                Some(_) => SelectCols::Cols(get_comma_separated_values(&caps["cols"])),
+                None => SelectCols::All,
+            };
+
             println!("{:?}", cols);
             return Ok(Query::Insert {
                 table_name: caps["table_name"].to_string(),
-                cols: getCols(&caps["cols"]),
+                cols,
                 values: vec![vec![]],
             });
         }

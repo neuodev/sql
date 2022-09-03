@@ -1,6 +1,8 @@
 use std::path::{Path, PathBuf};
 
-use crate::{query_parser::SelectCols, tables::Table, DB_DIR};
+use regex::Regex;
+
+use crate::{query_parser::SelectCols, regex::RE_COMMA_SEPARATED_VALUES, tables::Table, DB_DIR};
 
 pub fn get_db_path(name: &str) -> PathBuf {
     let base_dir = Path::new(DB_DIR);
@@ -40,4 +42,12 @@ pub fn getCols(query: &str) -> SelectCols {
 
         SelectCols::Cols(cols)
     }
+}
+
+pub fn get_comma_separated_values(query: &str) -> Vec<String> {
+    let re = Regex::new(RE_COMMA_SEPARATED_VALUES).unwrap();
+
+    re.captures_iter(query)
+        .map(|caps| caps["value"].to_string())
+        .collect::<Vec<_>>()
 }

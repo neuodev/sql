@@ -33,5 +33,5 @@ pub const RE_SELECT: &str =
 pub const RE_INSERT: &str =
     r"(?im)INSERT INTO (?P<table_name>[^\s\n;]+)(?P<cols>.+)? values\s?(?P<values>\(.+\))";
 
-/// A regex to match coma seperated values. [Example](https://regex101.com/r/OiSrOW/1)
-pub const RE_COMA_SEPERATED_VALUES: &str = r"(?im)(?P<value>[^,\(\)\s]+)";
+/// A regex to match comma separated values. [Example](https://regex101.com/r/OiSrOW/1)
+pub const RE_COMMA_SEPARATED_VALUES: &str = r"(?im)(?P<value>[^,\(\)\s]+)";
