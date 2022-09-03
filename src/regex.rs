@@ -24,17 +24,16 @@ pub const RE_ALTER_COL: &str = r"(?im)ALTER TABLE (?P<table_name>[^\s\n]+) alter
 /// A regex to match add column query. [Example](https://regex101.com/r/jcpHYb/1)
 pub const RE_ADD_COL: &str =
     r"(?im)ALTER TABLE (?P<table_name>[^\s\n]+) add (?P<col_name>[^\s\n]+) (?P<datatype>[^\s\n;]+)";
-
 /// A regex to match basic select queries with conditions. [Example](https://regex101.com/r/FhdTBh/1)
 pub const RE_SELECT: &str =
     r"(?im)select (?P<cols>.+) from (?P<table_name>[^\s;\n]+)( where (?P<condition>[^\n;]+))?";
-
 /// A regex to match complex insert queries. [Example](https://regex101.com/r/uAZ6Uo/1)
 pub const RE_INSERT: &str =
     r"(?im)INSERT INTO (?P<table_name>[^\s\n;]+)(?P<cols>.+)? values\s?(?P<values>\(.+\))";
-
 /// A regex to match comma separated values. [Example](https://regex101.com/r/OiSrOW/1)
 pub const RE_COMMA_SEPARATED_VALUES: &str = r"(?im)(?P<value>[^,\(\)\s]+)";
-
 /// A regex to match insert query values like `(val1, val2), (val1, val2) (val1, val2);[`. [Example](https://regex101.com/r/mJUv6g/1)
 pub const RE_INSERT_VALUES_VALUES: &str = r"(?im)(?P<row>\([^\);]+\))";
+/// A regex to match delete from table queries. [Example](https://regex101.com/r/RQEPGa/1)
+pub const RE_DELETE_FROM_TABLE: &str =
+    r"(?im)delete from (?P<table_name>[^\s]+) where (?P<condition>[^\n;]+)";
