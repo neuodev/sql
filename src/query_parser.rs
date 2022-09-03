@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-
 use regex::Regex;
+use std::collections::HashMap;
+use thiserror::Error;
 
 use crate::{
     regex::*,
@@ -65,10 +65,19 @@ pub enum Query {
     },
 }
 
-pub struct QueryParser;
+#[derive(Debug, Error)]
+pub enum QueryParserError {
+    #[error("Failed to parse the query")]
+    BadQuery(String),
+    #[error("Invalid query")]
+    InvalidDBAction(String),
+    #[error("Invalid query")]
+    InvalidTableAction(String),
+}
 
+pub struct QueryParser;
 impl QueryParser {
-    pub fn parse(query: &str) -> Result<Query, &'static str> {
+    pub fn parse(query: &str) -> Result<Query, QueryParserError> {
         let re_db = Regex::new(RE_DB).unwrap();
         if let Some(caps) = re_db.captures(query) {
             let name = caps["name"].to_string();
@@ -78,7 +87,7 @@ impl QueryParser {
                 "create" => DatabaseAction::Create,
                 "drop" => DatabaseAction::Drop,
                 "use" => DatabaseAction::Use,
-                _ => return Err("Invalid database action"),
+                _ => return Err(QueryParserError::InvalidDBAction(action.to_string())),
             };
 
             return Ok(Query::Database { name, action });
@@ -116,7 +125,11 @@ impl QueryParser {
                         query: TableQuery::Truncate,
                     })
                 }
-                _ => {}
+                _ => {
+                    return Err(QueryParserError::InvalidTableAction(
+                        caps["action"].to_string(),
+                    ))
+                }
             };
         }
 
@@ -194,7 +207,7 @@ impl QueryParser {
             });
         }
 
-        Err("Invalid query.")
+        Err(QueryParserError::BadQuery(query.to_string()))
     }
 }
 

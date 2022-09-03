@@ -7,7 +7,7 @@ mod utils;
 
 use database::DatabaseError;
 use inquire::InquireError;
-use query_planner::QueryPlanner;
+use query_planner::{QueryPlanner, QueryPlannerError};
 use tables::TableError;
 use thiserror::Error;
 
@@ -21,9 +21,11 @@ enum ErrorWrapper {
     TableError(#[from] TableError),
     #[error("Error while getting std input")]
     InputError(#[from] InquireError),
+    #[error("Unable to excude the query")]
+    QueryPlanner(#[from] QueryPlannerError),
 }
 
 fn main() -> Result<(), ErrorWrapper> {
-    QueryPlanner::init()?;
+    QueryPlanner::new()?;
     Ok(())
 }
