@@ -481,4 +481,24 @@ mod tests {
             panic!("Unexpected query")
         }
     }
+
+    #[test]
+    fn delete_from_table() {
+        let query = QueryParser::parse(
+            "DELETE FROM table_name WHERE name=jone;
+        ",
+        )
+        .unwrap();
+
+        if let Query::Table {
+            name,
+            query: TableQuery::Delete { condition },
+        } = query
+        {
+            assert_eq!(name, "table_name".to_string());
+            assert_eq!(condition, "name=jone".to_string());
+        } else {
+            panic!("Unexpected query")
+        }
+    }
 }
