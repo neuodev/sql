@@ -26,15 +26,32 @@ impl QueryPlanner {
             .map(|k| k.trim().to_string())
             .collect::<Vec<_>>();
 
-        let query_suggester = |q: &str| {
-            if q.is_empty() {
+        let query_suggester = |input: &str| {
+            if input.is_empty() {
                 return Ok(vec![]);
             };
+
+            let input_tokens = input.split(" ").collect::<Vec<_>>();
+            let num_of_tokens = input_tokens.len();
+
+            if num_of_tokens == 0 || input_tokens[num_of_tokens - 1].is_empty() {
+                return Ok(vec![]);
+            }
+
+            let q = input_tokens[num_of_tokens - 1];
+
             Ok(keywords
                 .clone()
                 .into_iter()
                 .filter(|keyword| keyword.starts_with(&q.to_uppercase()))
                 .take(4)
+                .map(|k| {
+                    let mut as_string = (&input_tokens[0..num_of_tokens - 1]).to_vec().join(" ");
+                    as_string.push(' ');
+                    as_string.push_str(&k);
+
+                    as_string
+                })
                 .collect::<Vec<_>>())
         };
 

@@ -120,3 +120,8 @@ WHERE condition;
 ```sql
 DELETE FROM table_name WHERE condition;
 ```
+
+# Todo
+
+- Use CSV files so you can only append to the file (no need to read first)
+- Use `Path` to interact with the file system
