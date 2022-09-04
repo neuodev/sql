@@ -27,7 +27,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn drop_db(name: &str) -> Result<(), DatabaseError> {
+    pub fn drop(name: &str) -> Result<(), DatabaseError> {
         let base_dir = Path::new(DB_DIR);
         let db_dir = base_dir.join(name);
 

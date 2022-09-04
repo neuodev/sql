@@ -1,6 +1,10 @@
 use std::ffi::OsStr;
 
-use crate::query_parser::{DatabaseAction, Query, QueryParser, QueryParserError, TableQuery};
+use crate::{
+    database::{Database, DatabaseError},
+    query_parser::{DatabaseAction, Query, QueryParser, QueryParserError, TableQuery},
+    tables::{Table, TableError},
+};
 use inquire::{
     validator::{StringValidator, Validation},
     Editor, InquireError,
@@ -13,6 +17,10 @@ pub enum QueryPlannerError {
     InputError(#[from] InquireError),
     #[error("Error while parsing the query")]
     QueryError(#[from] QueryParserError),
+    #[error("DB Error")]
+    DatabaseError(#[from] DatabaseError),
+    #[error("Table Error")]
+    TableError(#[from] TableError),
 }
 
 pub struct QueryPlanner;
@@ -49,22 +57,25 @@ impl QueryPlanner {
 
         match query {
             Query::Database { name, action } => match action {
-                DatabaseAction::Create => {}
-                DatabaseAction::Drop => {}
-                DatabaseAction::Use => {}
+                DatabaseAction::Create => Database::new(&name)?,
+                DatabaseAction::Drop => Database::drop(&name)?,
+                DatabaseAction::Use => todo!(),
             },
-            Query::Table { name, query } => match query {
-                TableQuery::Create { cols } => {}
-                TableQuery::DropTable => {}
-                TableQuery::Truncate => {}
-                TableQuery::DropCol(col) => {}
-                TableQuery::AlterCol { col_name, datatype } => {}
-                TableQuery::AddCol { col_name, datatype } => {}
-                TableQuery::Select { cols, condition } => {}
-                TableQuery::Insert { cols, values } => {}
-                TableQuery::Delete { condition } => {}
-            },
-        }
+            Query::Table { name, query } => {
+                let table = Table::new("stats", &name)?;
+                match query {
+                    TableQuery::Create { cols } => table.create(&cols)?,
+                    TableQuery::DropTable => table.drop()?,
+                    TableQuery::Truncate => table.truncate()?,
+                    TableQuery::DropCol(col) => todo!(),
+                    TableQuery::AlterCol { col_name, datatype } => todo!(),
+                    TableQuery::AddCol { col_name, datatype } => todo!(),
+                    TableQuery::Select { cols, condition } => todo!(),
+                    TableQuery::Insert { cols, values } => todo!(),
+                    TableQuery::Delete { condition } => todo!(),
+                }
+            }
+        };
 
         Ok(())
     }

@@ -36,7 +36,7 @@ impl<'a> Table<'a> {
         Ok(Self { db, table_name })
     }
 
-    pub fn create(&self, cols: &HashMap<&str, &str>) -> TableResult<()> {
+    pub fn create(&self, cols: &HashMap<String, String>) -> TableResult<()> {
         let fields = json!({ "fields": cols });
         let fields = serde_json::to_string_pretty(&fields)?;
 
