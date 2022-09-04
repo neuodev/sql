@@ -86,7 +86,7 @@ impl QueryParser {
         if let Some(caps) = re_show.captures(query) {
             return match caps["query"].to_lowercase().as_str() {
                 "databases" => Ok(Query::ShowAllDBs),
-                "database" => Ok(Query::ShowCurrDB),
+                "current database" => Ok(Query::ShowCurrDB),
                 "tables" => Ok(Query::ShowTables),
                 _ => Err(QueryParserError::BadQuery(query.to_string())),
             };
@@ -527,5 +527,16 @@ mod tests {
         } else {
             panic!("Unexpected query")
         }
+    }
+
+    #[test]
+    fn show_queries() {
+        let show_dbs = QueryParser::parse("SHOW DATABASES").unwrap();
+        let show_curr_db = QueryParser::parse("SHOW CURRENT DATABASE").unwrap();
+        let show_tables = QueryParser::parse("SHOW TABLES").unwrap();
+
+        assert_eq!(show_dbs, Query::ShowAllDBs);
+        assert_eq!(show_curr_db, Query::ShowCurrDB);
+        assert_eq!(show_tables, Query::ShowTables);
     }
 }
