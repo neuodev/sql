@@ -1,5 +1,9 @@
 // use crate::{utils::get_db_path, DB_DIR};
-use std::{fs, io, path::Path};
+use std::{
+    ffi::OsString,
+    fs, io,
+    path::{Path, PathBuf},
+};
 use thiserror::Error;
 
 use crate::utils::get_db_path;
@@ -59,8 +63,15 @@ impl Database {
         Ok(db)
     }
 
-    pub fn get_dbs() -> DBResult<Vec<String>> {
-        Ok(vec![])
+    pub fn get_dbs() -> DBResult<Vec<OsString>> {
+        let base_dir = Path::new(DB_DIR);
+        let dbs = fs::read_dir(base_dir)?
+            .filter_map(|e| e.ok())
+            .filter(|e| e.path().is_dir())
+            .map(|e| e.file_name())
+            .collect::<Vec<_>>();
+
+        Ok(dbs)
     }
 
     pub fn exists(name: &str) -> bool {

@@ -64,7 +64,6 @@ impl QueryPlanner {
 
     fn execute_query(raw_query: &str) -> Result<(), QueryPlannerError> {
         let query = QueryParser::parse(raw_query)?;
-        println!("[Query] {:?}", query);
         let curr_db = Database::get_curr_db()?;
         match query {
             Query::Database { name, action } => match action {
@@ -86,7 +85,13 @@ impl QueryPlanner {
                     TableQuery::Delete { condition } => todo!(),
                 }
             }
-            Query::ShowAllDBs => todo!(),
+            Query::ShowAllDBs => {
+                let dbs = Database::get_dbs()?;
+
+                dbs.iter().for_each(|db| {
+                    println!("> {}", db.to_str().unwrap());
+                })
+            }
             Query::ShowCurrDB => {
                 println!("Current DB: {}", curr_db);
             }
