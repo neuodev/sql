@@ -9,7 +9,7 @@ use crate::{
     utils::{get_db_path, get_schema_path, get_table_path},
 };
 
-type TableEntries = Vec<HashMap<String, String>>;
+pub type TableEntries = Vec<HashMap<String, String>>;
 
 pub struct Table<'a> {
     pub db: &'a str,
@@ -88,6 +88,11 @@ impl<'a> Table<'a> {
         );
         self.write(&all_entries)?;
         Ok(())
+    }
+
+    pub fn select(&self, cols: SelectCols, condition: Option<String>) -> TableResult<TableEntries> {
+        let all_entries = self.read()?;
+        Ok(all_entries)
     }
 
     pub fn alter<N: Into<String> + Copy, T: Into<String>>(

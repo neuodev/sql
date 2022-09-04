@@ -2,6 +2,7 @@ use crate::{
     database::{Database, DatabaseError},
     query_parser::{DatabaseAction, Query, QueryParser, QueryParserError, TableQuery},
     tables::{Table, TableError},
+    utils::display_entries,
 };
 use inquire::{validator::Validation, InquireError, Text};
 use thiserror::Error;
@@ -101,7 +102,15 @@ impl QueryPlanner {
                     TableQuery::AddCol { col_name, datatype } => {
                         table.add_col(col_name, datatype)?
                     }
-                    TableQuery::Select { cols, condition } => todo!(),
+                    TableQuery::Select { cols, condition } => {
+                        let entries = table.select(cols, condition)?;
+
+                        if entries.is_empty() {
+                            println!("No entries")
+                        } else {
+                            display_entries(entries);
+                        }
+                    }
                     TableQuery::Insert { cols, values } => table.insert(cols, values)?,
                     TableQuery::Delete { condition } => todo!(),
                 }
