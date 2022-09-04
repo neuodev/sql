@@ -65,12 +65,26 @@ pub fn display_entries(entries: TableEntries) {
 
     if let Some(entry) = entries.get(0) {
         let mut header = String::new();
-        entry
-            .keys()
-            .into_iter()
-            .for_each(|k| header.push_str(&format!("{k}\t")));
 
+        let mut sorted_cols = vec![];
+        entry.keys().into_iter().for_each(|k| {
+            sorted_cols.push(k);
+            header.push_str(&format!("{k}\t"));
+        });
+
+        header.push('\n');
         tw.write_all(header.as_bytes()).unwrap();
+        entries.iter().for_each(|row| {
+            let mut row_str = String::new();
+            sorted_cols.iter().for_each(|&k| {
+                let value = row.get(k).unwrap();
+                row_str.push_str(&format!("{value}\t"));
+            });
+
+            row_str.push('\n');
+            tw.write_all(row_str.as_bytes()).unwrap();
+        });
+
         tw.flush().unwrap();
         let written = String::from_utf8(tw.into_inner().unwrap()).unwrap();
         println!("{}", written);
