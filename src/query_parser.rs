@@ -80,7 +80,8 @@ pub enum QueryParserError {
 
 pub struct QueryParser;
 impl QueryParser {
-    pub fn parse(query: &str) -> Result<Query, QueryParserError> {
+    pub fn parse(mut query: &str) -> Result<Query, QueryParserError> {
+        query = query.trim();
         let re_show = Regex::new(RE_SHOW_QUERY).unwrap();
 
         if let Some(caps) = re_show.captures(query) {

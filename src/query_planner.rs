@@ -102,7 +102,7 @@ impl QueryPlanner {
                         table.add_col(col_name, datatype)?
                     }
                     TableQuery::Select { cols, condition } => todo!(),
-                    TableQuery::Insert { cols, values } => todo!(),
+                    TableQuery::Insert { cols, values } => table.insert(cols, values)?,
                     TableQuery::Delete { condition } => todo!(),
                 }
             }

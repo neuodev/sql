@@ -5,6 +5,7 @@ use thiserror::Error;
 
 use crate::{
     database::{Database, DatabaseError},
+    query_parser::SelectCols,
     utils::{get_db_path, get_schema_path, get_table_path},
 };
 
@@ -52,11 +53,37 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
-    pub fn insert(&self, entries: &TableEntries) -> TableResult<()> {
+    pub fn insert(&self, cols: SelectCols, values: Vec<Vec<String>>) -> TableResult<()> {
         Database::exists_or_err(self.db)?;
+
+        let cols = match cols {
+            SelectCols::Cols(cols) => cols,
+            SelectCols::All => {
+                let schema = self.read_schema()?;
+
+                schema.fields.keys().map(|c| c.clone()).collect::<Vec<_>>()
+            }
+        };
+
+        let new_entries = values
+            .into_iter()
+            .map(|row| {
+                assert_eq!(row.len(), cols.len());
+                let mut map = HashMap::new();
+                cols.iter().zip(row).map(|(k, v)| map.insert(k.clone(), v));
+
+                map
+            })
+            .collect::<Vec<HashMap<_, _>>>();
+
         let mut all_entries = self.read()?;
-        println!("[{}@{}] {:?}", self.table_name, self.db, all_entries.len());
-        all_entries.extend(entries.clone());
+        all_entries.extend(new_entries);
+        println!(
+            "[{}@{}] {:?} entry",
+            self.table_name,
+            self.db,
+            all_entries.len()
+        );
         self.write(&all_entries)?;
         Ok(())
     }
