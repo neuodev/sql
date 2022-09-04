@@ -70,7 +70,9 @@ impl<'a> Table<'a> {
             .map(|row| {
                 assert_eq!(row.len(), cols.len());
                 let mut map = HashMap::new();
-                cols.iter().zip(row).map(|(k, v)| map.insert(k.clone(), v));
+                cols.iter().zip(row).for_each(|(k, v)| {
+                    map.insert(k.clone(), v);
+                });
 
                 map
             })
