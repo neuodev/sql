@@ -37,3 +37,6 @@ pub const RE_INSERT_VALUES_VALUES: &str = r"(?im)(?P<row>\([^\);]+\))";
 /// A regex to match delete from table queries. [Example](https://regex101.com/r/RQEPGa/1)
 pub const RE_DELETE_FROM_TABLE: &str =
     r"(?im)delete from (?P<table_name>[^\s]+) where (?P<condition>[^\n;]+)";
+
+/// A regex to 'SHOW' queries like `SHOW DATABASES` or `SHOW TABLES`. [Example](https://regex101.com/r/bbs4lA/1)
+pub const RE_SHOW_QUERY: &str = r"(?im)SHOW (?P<query>[^\n;]+)";

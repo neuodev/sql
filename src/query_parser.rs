@@ -55,6 +55,9 @@ pub enum SelectCols {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Query {
+    ShowAllDBs,
+    ShowCurrDB,
+    ShowTables,
     Database {
         name: String,
         action: DatabaseAction,
@@ -69,7 +72,7 @@ pub enum Query {
 pub enum QueryParserError {
     #[error("Failed to parse the query")]
     BadQuery(String),
-    #[error("Invalid query")]
+    #[error("Invalid DB query")]
     InvalidDBAction(String),
     #[error("Invalid query")]
     InvalidTableAction(String),
@@ -78,6 +81,17 @@ pub enum QueryParserError {
 pub struct QueryParser;
 impl QueryParser {
     pub fn parse(query: &str) -> Result<Query, QueryParserError> {
+        let re_show = Regex::new(RE_SHOW_QUERY).unwrap();
+
+        if let Some(caps) = re_show.captures(query) {
+            return match caps["query"].to_lowercase().as_str() {
+                "databases" => Ok(Query::ShowAllDBs),
+                "database" => Ok(Query::ShowCurrDB),
+                "tables" => Ok(Query::ShowTables),
+                _ => Err(QueryParserError::BadQuery(query.to_string())),
+            };
+        }
+
         let re_db = Regex::new(RE_DB).unwrap();
         if let Some(caps) = re_db.captures(query) {
             let name = caps["name"].to_string();

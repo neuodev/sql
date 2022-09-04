@@ -74,7 +74,8 @@ impl QueryPlanner {
                 DatabaseAction::Use => Database::use_db(&name)?,
             },
             Query::Table { name, query } => {
-                let table = Table::new("stats", &name)?;
+                let curr_db = Database::get_curr_db()?;
+                let table = Table::new(&curr_db, &name)?;
                 match query {
                     TableQuery::Create { cols } => table.create(&cols)?,
                     TableQuery::DropTable => table.drop()?,
@@ -87,6 +88,9 @@ impl QueryPlanner {
                     TableQuery::Delete { condition } => todo!(),
                 }
             }
+            Query::ShowAllDBs => todo!(),
+            Query::ShowCurrDB => todo!(),
+            Query::ShowTables => todo!(),
         };
 
         Ok(())

@@ -51,12 +51,12 @@ impl Database {
         Ok(())
     }
 
-    pub fn get_curr_db() -> DBResult<()> {
+    pub fn get_curr_db() -> DBResult<String> {
         let base_dir = Path::new(DB_DIR);
-        Database::exists_or_err(name)?;
         let curr_db = base_dir.join(CURR_DB);
-        fs::write(curr_db, name)?;
-        Ok(())
+        let db = fs::read_to_string(curr_db)?;
+        Database::exists_or_err(&db)?;
+        Ok(db)
     }
 
     pub fn exists(name: &str) -> bool {
