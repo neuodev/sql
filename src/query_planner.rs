@@ -28,7 +28,7 @@ impl QueryPlanner {
     pub fn new() -> Result<(), QueryPlannerError> {
         let keywords = include_str!("../mysql5.0_keywords.txt")
             .split("\n")
-            .map(|k| k.to_string())
+            .map(|k| k.trim().to_string())
             .collect::<Vec<_>>();
 
         let query_suggester = |q: &str| {
