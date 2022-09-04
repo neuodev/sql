@@ -57,7 +57,7 @@ impl QueryPlanner {
 
         loop {
             let query = Text::new("sql #>")
-                .with_placeholder("SELECT * FROM user")
+                .with_placeholder("SELECT * FROM ...")
                 .with_page_size(200)
                 .with_suggester(&query_suggester)
                 .with_validator(|q: &str| {
@@ -94,9 +94,11 @@ impl QueryPlanner {
                     TableQuery::Create { cols } => table.create(&cols)?,
                     TableQuery::DropTable => table.drop()?,
                     TableQuery::Truncate => table.truncate()?,
-                    TableQuery::DropCol(col) => todo!(),
+                    TableQuery::DropCol(col) => table.remove_col(col)?,
                     TableQuery::AlterCol { col_name, datatype } => todo!(),
-                    TableQuery::AddCol { col_name, datatype } => todo!(),
+                    TableQuery::AddCol { col_name, datatype } => {
+                        table.add_col(col_name, datatype)?
+                    }
                     TableQuery::Select { cols, condition } => todo!(),
                     TableQuery::Insert { cols, values } => todo!(),
                     TableQuery::Delete { condition } => todo!(),

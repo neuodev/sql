@@ -60,9 +60,8 @@ impl<'a> Table<'a> {
     }
 
     pub fn alter(&self) {
-        // Update schema
-
         // Todo: Update the actual table
+        // Update schema
     }
 
     pub fn drop(&self) -> TableResult<()> {
@@ -82,7 +81,11 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
-    pub fn add_col(&self, col_name: &str, col_type: &str) -> TableResult<()> {
+    pub fn add_col<N: Into<String>, T: Into<String>>(
+        &self,
+        col_name: N,
+        col_type: T,
+    ) -> TableResult<()> {
         let mut schema = self.read_schema()?;
         schema.fields.insert(col_name.into(), col_type.into());
         self.write_schema(schema)?;
