@@ -24,7 +24,9 @@ pub enum TableError {
     #[error("Invalid JSON")]
     SerializationErr(#[from] serde_json::Error),
     #[error("Table not found")]
-    NotFond(String),
+    TableNotFond(String),
+    #[error("Column not found")]
+    ColNotFond(String),
 }
 
 type TableResult<T> = Result<T, TableError>;
@@ -59,9 +61,24 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
-    pub fn alter(&self) {
+    pub fn alter<N: Into<String> + Copy, T: Into<String>>(
+        &self,
+        col_name: N,
+        datatype: T,
+    ) -> TableResult<()> {
         // Todo: Update the actual table
         // Update schema
+        self.exists_or_err()?;
+
+        let mut schema = self.read_schema()?;
+        if !schema.fields.contains_key(&col_name.into()) {
+            return Err(TableError::ColNotFond(col_name.into()));
+        }
+
+        schema.fields.insert(col_name.into(), datatype.into());
+        self.write_schema(schema)?;
+
+        Ok(())
     }
 
     pub fn drop(&self) -> TableResult<()> {
@@ -84,10 +101,10 @@ impl<'a> Table<'a> {
     pub fn add_col<N: Into<String>, T: Into<String>>(
         &self,
         col_name: N,
-        col_type: T,
+        datatype: T,
     ) -> TableResult<()> {
         let mut schema = self.read_schema()?;
-        schema.fields.insert(col_name.into(), col_type.into());
+        schema.fields.insert(col_name.into(), datatype.into());
         self.write_schema(schema)?;
         Ok(())
     }
@@ -143,7 +160,7 @@ impl<'a> Table<'a> {
         Database::exists_or_err(self.db)?;
 
         if !self.exist() {
-            Err(TableError::NotFond(self.table_name.to_string()))
+            Err(TableError::TableNotFond(self.table_name.to_string()))
         } else {
             Ok(())
         }
