@@ -33,13 +33,13 @@ impl QueryPlanner {
             Ok(keywords
                 .clone()
                 .into_iter()
-                .filter(|keyword| keyword.to_lowercase().starts_with(q))
+                .filter(|keyword| keyword.starts_with(&q.to_uppercase()))
                 .take(4)
                 .collect::<Vec<_>>())
         };
 
         loop {
-            let query = Text::new("Enter SQL Query")
+            let query = Text::new("query #>")
                 .with_placeholder("SELECT * FROM user")
                 .with_page_size(200)
                 .with_suggester(&query_suggester)
@@ -85,17 +85,15 @@ impl QueryPlanner {
                     TableQuery::Delete { condition } => todo!(),
                 }
             }
-            Query::ShowAllDBs => {
-                let dbs = Database::get_dbs()?;
-
-                dbs.iter().for_each(|db| {
-                    println!("> {}", db.to_str().unwrap());
-                })
-            }
+            Query::ShowAllDBs => Database::get_dbs()?.iter().for_each(|db| {
+                println!("{}", db);
+            }),
             Query::ShowCurrDB => {
                 println!("Current DB: {}", curr_db);
             }
-            Query::ShowTables => todo!(),
+            Query::ShowTables => Database::get_db_tables(&curr_db)?.iter().for_each(|t| {
+                println!("{}", t);
+            }),
         };
 
         Ok(())

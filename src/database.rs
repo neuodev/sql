@@ -3,6 +3,7 @@ use std::{
     ffi::OsString,
     fs, io,
     path::{Path, PathBuf},
+    str::FromStr,
 };
 use thiserror::Error;
 
@@ -63,15 +64,28 @@ impl Database {
         Ok(db)
     }
 
-    pub fn get_dbs() -> DBResult<Vec<OsString>> {
+    pub fn get_dbs() -> DBResult<Vec<String>> {
         let base_dir = Path::new(DB_DIR);
         let dbs = fs::read_dir(base_dir)?
             .filter_map(|e| e.ok())
             .filter(|e| e.path().is_dir())
-            .map(|e| e.file_name())
+            .map(|e| String::from_str(e.file_name().to_str().unwrap()).unwrap())
             .collect::<Vec<_>>();
 
         Ok(dbs)
+    }
+
+    pub fn get_db_tables(db_name: &str) -> DBResult<Vec<String>> {
+        Database::exists_or_err(db_name)?;
+        let db_path = get_db_path(db_name);
+        let tables = fs::read_dir(db_path)?
+            .filter_map(|e| e.ok())
+            .map(|e| String::from_str(e.file_name().to_str().unwrap()).unwrap())
+            .filter(|f| f.ends_with("schema.json"))
+            .map(|f| f.split(".").nth(0).unwrap().to_string())
+            .collect::<Vec<_>>();
+
+        Ok(tables)
     }
 
     pub fn exists(name: &str) -> bool {
