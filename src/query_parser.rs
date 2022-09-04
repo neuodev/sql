@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use crate::{
     regex::*,
-    utils::{getCols, get_comma_separated_values},
+    utils::{get_cols, get_comma_separated_values},
 };
 
 pub type TableName = String;
@@ -187,7 +187,7 @@ impl QueryParser {
                 name: caps["table_name"].to_string(),
                 query: TableQuery::Select {
                     condition,
-                    cols: getCols(&caps["cols"]),
+                    cols: get_cols(&caps["cols"]),
                 },
             });
         }

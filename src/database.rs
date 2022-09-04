@@ -59,6 +59,10 @@ impl Database {
         Ok(db)
     }
 
+    pub fn get_dbs() -> DBResult<Vec<String>> {
+        Ok(vec![])
+    }
+
     pub fn exists(name: &str) -> bool {
         let path = get_db_path(name);
         path.exists()

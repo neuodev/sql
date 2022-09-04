@@ -31,7 +31,7 @@ pub fn get_table_path(table: &Table) -> PathBuf {
     db_dir.join(table_file(table.table_name))
 }
 
-pub fn getCols(query: &str) -> SelectCols {
+pub fn get_cols(query: &str) -> SelectCols {
     let query = query.trim();
 
     if query == "*" {
