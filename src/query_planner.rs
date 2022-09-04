@@ -1,14 +1,9 @@
-use std::ffi::OsStr;
-
 use crate::{
     database::{Database, DatabaseError},
     query_parser::{DatabaseAction, Query, QueryParser, QueryParserError, TableQuery},
     tables::{Table, TableError},
 };
-use inquire::{
-    validator::{StringValidator, Validation},
-    Editor, InquireError, Text,
-};
+use inquire::{validator::Validation, InquireError, Text};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -76,7 +71,7 @@ impl QueryPlanner {
             Query::Database { name, action } => match action {
                 DatabaseAction::Create => Database::new(&name)?,
                 DatabaseAction::Drop => Database::drop(&name)?,
-                DatabaseAction::Use => todo!(),
+                DatabaseAction::Use => Database::use_db(&name)?,
             },
             Query::Table { name, query } => {
                 let table = Table::new("stats", &name)?;

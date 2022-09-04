@@ -14,9 +14,11 @@ pub enum DatabaseError {
     NotFound(String),
 }
 
+type DBResult = Result<(), DatabaseError>;
+
 pub struct Database;
 impl Database {
-    pub fn new(name: &str) -> Result<(), DatabaseError> {
+    pub fn new(name: &str) -> DBResult {
         let base_dir = Path::new(DB_DIR);
         let db_dir = base_dir.join(name);
         if db_dir.exists() {
@@ -27,7 +29,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn drop(name: &str) -> Result<(), DatabaseError> {
+    pub fn drop(name: &str) -> DBResult {
         let base_dir = Path::new(DB_DIR);
         let db_dir = base_dir.join(name);
 
@@ -38,12 +40,20 @@ impl Database {
         Ok(())
     }
 
+    pub fn use_db(name: &str) -> DBResult {
+        let base_dir = Path::new(DB_DIR);
+        Database::exists_or_err(name)?;
+        let curr_db = base_dir.join("curr_db");
+        fs::write(curr_db, name)?;
+        Ok(())
+    }
+
     pub fn exists(name: &str) -> bool {
         let path = get_db_path(name);
         path.exists()
     }
 
-    pub fn exists_or_err(name: &str) -> Result<(), DatabaseError> {
+    pub fn exists_or_err(name: &str) -> DBResult {
         if !Database::exists(name) {
             Err(DatabaseError::NotFound(name.to_string()))
         } else {

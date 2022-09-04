@@ -5,7 +5,7 @@ use thiserror::Error;
 
 use crate::{
     database::{Database, DatabaseError},
-    utils::{get_db_path, get_schema_path, get_table_path, schema_file, table_file},
+    utils::{get_db_path, get_schema_path, get_table_path},
 };
 
 type TableEntries = Vec<HashMap<String, String>>;
