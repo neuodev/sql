@@ -39,7 +39,7 @@ impl QueryPlanner {
         };
 
         loop {
-            let query = Text::new("query #>")
+            let query = Text::new("sql #>")
                 .with_placeholder("SELECT * FROM user")
                 .with_page_size(200)
                 .with_suggester(&query_suggester)
