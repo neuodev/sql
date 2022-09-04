@@ -5,10 +5,7 @@ mod regex;
 mod tables;
 mod utils;
 
-use database::DatabaseError;
-use inquire::InquireError;
 use query_planner::{QueryPlanner, QueryPlannerError};
-use tables::TableError;
 use thiserror::Error;
 
 pub const DB_DIR: &str = "./sql";

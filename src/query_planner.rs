@@ -7,7 +7,7 @@ use crate::{
 };
 use inquire::{
     validator::{StringValidator, Validation},
-    Editor, InquireError,
+    Editor, InquireError, Text,
 };
 use thiserror::Error;
 
@@ -26,10 +26,28 @@ pub enum QueryPlannerError {
 pub struct QueryPlanner;
 impl QueryPlanner {
     pub fn new() -> Result<(), QueryPlannerError> {
+        let keywords = include_str!("../mysql5.0_keywords.txt")
+            .split("\n")
+            .map(|k| k.to_string())
+            .collect::<Vec<_>>();
+
+        let query_suggester = |q: &str| {
+            if q.is_empty() {
+                return Ok(vec![]);
+            };
+            Ok(keywords
+                .clone()
+                .into_iter()
+                .filter(|keyword| keyword.to_lowercase().starts_with(q))
+                .take(4)
+                .collect::<Vec<_>>())
+        };
+
         loop {
-            let query = Editor::new("SQL query")
-                .with_help_message("Enter SQL query")
-                .with_file_extension("sql")
+            let query = Text::new("Enter SQL Query")
+                .with_placeholder("SELECT * FROM user")
+                .with_page_size(200)
+                .with_suggester(&query_suggester)
                 .with_validator(|q: &str| {
                     if q.is_empty() {
                         Ok(Validation::Invalid("Empty query".into()))
@@ -38,7 +56,6 @@ impl QueryPlanner {
                     }
                 })
                 .prompt();
-
             if let Err(e) = query {
                 eprintln!("{:?}", e);
                 continue;
