@@ -2,7 +2,9 @@ use std::path::{Path, PathBuf};
 
 use regex::Regex;
 
-use crate::{query_parser::SelectCols, regex::RE_COMMA_SEPARATED_VALUES, tables::Table, DB_DIR};
+use crate::{
+    database::DB_DIR, query_parser::SelectCols, regex::RE_COMMA_SEPARATED_VALUES, tables::Table,
+};
 
 pub fn get_db_path(name: &str) -> PathBuf {
     let base_dir = Path::new(DB_DIR);

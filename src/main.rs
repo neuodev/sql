@@ -8,8 +8,6 @@ mod utils;
 use query_planner::{QueryPlanner, QueryPlannerError};
 use thiserror::Error;
 
-pub const DB_DIR: &str = "./sql";
-
 #[derive(Debug, Error)]
 enum ErrorWrapper {
     #[error("Unable to excude the query")]
