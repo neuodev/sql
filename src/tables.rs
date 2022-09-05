@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::{collections::HashMap, fs, io};
+use std::{collections::HashMap, fs, io, ops::Index};
 use thiserror::Error;
 
 use crate::{
@@ -27,7 +27,9 @@ pub enum TableError {
     #[error("Table not found")]
     TableNotFond(String),
     #[error("Column not found")]
-    ColNotFond(String),
+    ColNotFound(String),
+    #[error("Column type  not found")]
+    ColTypeNotFound(String),
 }
 
 type TableResult<T> = Result<T, TableError>;
@@ -58,11 +60,7 @@ impl<'a> Table<'a> {
 
         let cols = match cols {
             SelectCols::Cols(cols) => cols,
-            SelectCols::All => {
-                let schema = self.read_schema()?;
-
-                schema.fields.keys().map(|c| c.clone()).collect::<Vec<_>>()
-            }
+            SelectCols::All => self.read_schema()?.cols,
         };
 
         let new_entries = values
@@ -95,7 +93,7 @@ impl<'a> Table<'a> {
         Ok(all_entries)
     }
 
-    pub fn alter<N: Into<String> + Copy, T: Into<String>>(
+    pub fn alter<N: Into<String> + Copy + PartialEq, T: Into<String>>(
         &self,
         col_name: N,
         datatype: T,
@@ -103,16 +101,21 @@ impl<'a> Table<'a> {
         // Todo: Update the actual table
         // Update schema
         self.exists_or_err()?;
-
         let mut schema = self.read_schema()?;
-        if !schema.fields.contains_key(&col_name.into()) {
-            return Err(TableError::ColNotFond(col_name.into()));
+        let p = schema.cols.iter().position(|&c| c == col_name.into());
+
+        match p {
+            None => Err(TableError::ColNotFound(col_name.into())),
+            Some(pos) => match schema.types.get(pos) {
+                None => Err(TableError::ColTypeNotFound(col_name.into())),
+                Some(_) => {
+                    schema.types[pos] = datatype.into();
+                    self.write_schema(schema)?;
+
+                    Ok(())
+                }
+            },
         }
-
-        schema.fields.insert(col_name.into(), datatype.into());
-        self.write_schema(schema)?;
-
-        Ok(())
     }
 
     pub fn drop(&self) -> TableResult<()> {
@@ -203,5 +206,6 @@ impl<'a> Table<'a> {
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Schema {
-    fields: HashMap<String, String>,
+    cols: Vec<String>,
+    types: Vec<String>,
 }

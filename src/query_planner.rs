@@ -82,7 +82,6 @@ impl QueryPlanner {
 
     fn execute_query(raw_query: &str) -> Result<(), QueryPlannerError> {
         let query = QueryParser::parse(raw_query)?;
-        let curr_db = Database::get_curr_db()?;
         match query {
             Query::Database { name, action } => match action {
                 DatabaseAction::Create => Database::new(&name)?,
@@ -90,6 +89,7 @@ impl QueryPlanner {
                 DatabaseAction::Use => Database::use_db(&name)?,
             },
             Query::Table { name, query } => {
+                let curr_db = Database::get_curr_db()?;
                 let table = Table::new(&curr_db, &name)?;
                 match query {
                     TableQuery::Create { cols, types } => table.create(cols, types)?,
@@ -119,11 +119,15 @@ impl QueryPlanner {
                 println!("{}", db);
             }),
             Query::ShowCurrDB => {
+                let curr_db = Database::get_curr_db()?;
                 println!("Current DB: {}", curr_db);
             }
-            Query::ShowTables => Database::get_db_tables(&curr_db)?.iter().for_each(|t| {
-                println!("{}", t);
-            }),
+            Query::ShowTables => {
+                let curr_db = Database::get_curr_db()?;
+                Database::get_db_tables(&curr_db)?.iter().for_each(|t| {
+                    println!("{}", t);
+                })
+            }
         };
 
         Ok(())

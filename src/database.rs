@@ -1,10 +1,4 @@
-// use crate::{utils::get_db_path, DB_DIR};
-use std::{
-    ffi::OsString,
-    fs, io,
-    path::{Path, PathBuf},
-    str::FromStr,
-};
+use std::{fs, io, path::Path, str::FromStr};
 use thiserror::Error;
 
 use crate::utils::get_db_path;
@@ -44,7 +38,7 @@ impl Database {
         if !db_dir.exists() {
             return Err(DatabaseError::NotFound(name.to_string()));
         }
-        fs::remove_dir(db_dir)?;
+        fs::remove_dir_all(db_dir)?;
         Ok(())
     }
 
