@@ -98,7 +98,7 @@ impl<'a> Table<'a> {
                 SelectCols::Cols(selectd_cols) => {
                     let mut map = HashMap::new();
                     selectd_cols.into_iter().for_each(|col| {
-                        map.insert(col.clone(), entry.get(col).unwrap().clone());
+                        map.insert(col.clone(), entry.get(col.trim()).unwrap().clone());
                     });
                     map
                 }
