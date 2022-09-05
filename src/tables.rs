@@ -5,7 +5,7 @@ use thiserror::Error;
 
 use crate::{
     database::{Database, DatabaseError},
-    query_parser::SelectCols,
+    query_parser::{Condition, SelectCols},
     utils::{get_db_path, get_schema_path, get_table_path},
 };
 
@@ -88,7 +88,11 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
-    pub fn select(&self, cols: SelectCols, condition: Option<String>) -> TableResult<TableEntries> {
+    pub fn select(
+        &self,
+        cols: SelectCols,
+        condition: Option<Condition>,
+    ) -> TableResult<TableEntries> {
         dbg!(&condition);
         let all_entries = self.read()?;
 

@@ -35,7 +35,7 @@ pub enum TableQuery {
     DropCol(ColName),
     Select {
         cols: SelectCols,
-        condition: Option<String>,
+        condition: Option<Condition>,
     },
     Insert {
         cols: SelectCols,
@@ -185,14 +185,15 @@ impl QueryParser {
 
         let re_select = Regex::new(RE_SELECT).unwrap();
         if let Some(caps) = re_select.captures(query) {
-            let condition = caps
-                .name("condition")
-                .map(|_| caps["condition"].to_string());
+            let condition = caps.name("condition").map(|_| &caps["condition"]);
 
             return Ok(Query::Table {
                 name: caps["table_name"].to_string(),
                 query: TableQuery::Select {
-                    condition,
+                    condition: match condition {
+                        None => None,
+                        Some(c) => Some(Condition::parse(c)?),
+                    },
                     cols: get_cols(&caps["cols"]),
                 },
             });
@@ -231,7 +232,7 @@ impl QueryParser {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Operator {
     Eq,
     NotEq,
@@ -241,7 +242,7 @@ pub enum Operator {
     LtEq,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Condition {
     key: String,
     value: String,
@@ -281,7 +282,7 @@ impl Condition {
 
 #[cfg(test)]
 mod tests {
-    use crate::query_parser::{DatabaseAction, Query, SelectCols, TableQuery};
+    use crate::query_parser::{Condition, DatabaseAction, Operator, Query, SelectCols, TableQuery};
 
     use super::QueryParser;
 
@@ -460,7 +461,7 @@ mod tests {
 
     #[test]
     fn parse_select_statment_with_condition() {
-        let query = QueryParser::parse("SELECT id,name FROM user WHERE age=12").unwrap();
+        let query = QueryParser::parse("SELECT id,name FROM user WHERE age >= 12").unwrap();
 
         if let Query::Table {
             name,
@@ -470,7 +471,14 @@ mod tests {
             assert_eq!(name, "user".to_string());
             assert_eq!(cols, SelectCols::Cols(vec!["id".into(), "name".into()]));
             assert!(condition.is_some());
-            assert_eq!(condition.unwrap(), "age=12");
+            assert_eq!(
+                condition.unwrap(),
+                Condition {
+                    key: "age".into(),
+                    value: "12".into(),
+                    operator: Operator::GtEq
+                }
+            );
         } else {
             panic!("Unexpected query")
         }
@@ -478,7 +486,7 @@ mod tests {
 
     #[test]
     fn parse_select_statment_with_all_cols_and_condition() {
-        let query = QueryParser::parse("SELECT * FROM user WHERE age=12").unwrap();
+        let query = QueryParser::parse("SELECT * FROM user WHERE age = 12").unwrap();
 
         if let Query::Table {
             name,
@@ -488,7 +496,14 @@ mod tests {
             assert_eq!(name, "user".to_string());
             assert_eq!(cols, SelectCols::All);
             assert!(condition.is_some());
-            assert_eq!(condition.unwrap(), "age=12");
+            assert_eq!(
+                condition.unwrap(),
+                Condition {
+                    key: "age".into(),
+                    value: "12".into(),
+                    operator: Operator::Eq
+                }
+            );
         } else {
             panic!("Unexpected query")
         }
