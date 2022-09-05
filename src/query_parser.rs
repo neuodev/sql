@@ -116,7 +116,7 @@ impl QueryParser {
             let mut types = Vec::new();
             let mut cols = Vec::new();
             re_entries.captures_iter(&caps["entries"]).for_each(|caps| {
-                cols.push(caps["col_type"].to_string());
+                types.push(caps["col_type"].to_string());
                 cols.push(caps["col_name"].to_string())
             });
 
@@ -309,7 +309,7 @@ mod tests {
             r#"CREATE TABLE t_name (
                 column1 datatype1,
                 column2 datatype2,
-                column3 datatype2,
+                column3 datatype3,
                );"#,
         )
         .unwrap();
@@ -320,8 +320,8 @@ mod tests {
         {
             assert_eq!(name, "t_name".to_string());
             assert_eq!(cols[0], "column1".to_string());
-            assert_eq!(cols[1], "column1".to_string());
-            assert_eq!(cols[2], "column2".to_string());
+            assert_eq!(cols[1], "column2".to_string());
+            assert_eq!(cols[2], "column3".to_string());
             assert_eq!(types[0], "datatype1".to_string());
             assert_eq!(types[1], "datatype2".to_string());
             assert_eq!(types[2], "datatype3".to_string());
