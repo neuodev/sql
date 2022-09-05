@@ -67,7 +67,7 @@ pub enum Query {
     },
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum QueryParserError {
     #[error("Failed to parse the query")]
     BadQuery(String),
@@ -284,7 +284,7 @@ impl Condition {
 mod tests {
     use crate::query_parser::{Condition, DatabaseAction, Operator, Query, SelectCols, TableQuery};
 
-    use super::QueryParser;
+    use super::{QueryParser, QueryParserError};
 
     #[test]
     fn create_database() {
@@ -632,5 +632,38 @@ mod tests {
         assert_eq!(show_dbs, Query::ShowAllDBs);
         assert_eq!(show_curr_db, Query::ShowCurrDB);
         assert_eq!(show_tables, Query::ShowTables);
+    }
+
+    #[test]
+    fn parse_eq_condition() {
+        let con = Condition::parse("name = jone").unwrap();
+
+        assert_eq!(
+            con,
+            Condition {
+                key: "name".into(),
+                value: "jone".into(),
+                operator: Operator::Eq
+            }
+        )
+    }
+
+    #[test]
+    fn parse_less_than_or_equal_condition() {
+        let con = Condition::parse("age <= 21").unwrap();
+        assert_eq!(
+            con,
+            Condition {
+                key: "age".into(),
+                value: "21".into(),
+                operator: Operator::LtEq
+            }
+        )
+    }
+
+    #[test]
+    fn parse_invalid_condition() {
+        let con = Condition::parse("age !! 21");
+        assert_eq!(con, Err(QueryParserError::InvalidOperator("!!".into())));
     }
 }
