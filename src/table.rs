@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::{collections::HashMap, f32::consts::E, fs, io, ops::Index};
+use std::{collections::HashMap, fs, io};
 use thiserror::Error;
 
 use crate::{
@@ -97,29 +97,7 @@ impl<'a> Table<'a> {
 
         let entries = all_entries
             .into_iter()
-            .filter(|e| {
-                if condition.is_none() {
-                    return true;
-                }
-
-                let Condition {
-                    key,
-                    value,
-                    operator,
-                } = condition.as_ref().unwrap();
-
-                match e.get(key) {
-                    None => false,
-                    Some(v) => match operator {
-                        Operator::Eq => v == value,
-                        Operator::NotEq => v != value,
-                        Operator::Gt => v > value,
-                        Operator::Lt => v < value,
-                        Operator::GtEq => v >= value,
-                        Operator::LtEq => v <= value,
-                    },
-                }
-            })
+            .filter(|e| Table::match_query(&condition, e))
             .map(|entry| match &cols {
                 SelectCols::All => entry,
                 SelectCols::Cols(selectd_cols) => {
@@ -133,6 +111,18 @@ impl<'a> Table<'a> {
             .collect::<Vec<HashMap<_, _>>>();
 
         Ok(entries)
+    }
+
+    pub fn delete(&self, condition: Option<Condition>) -> TableResult<()> {
+        let all_entries = self.read()?;
+
+        let entries = all_entries
+            .into_iter()
+            .filter(|e| Table::match_query(&condition, e))
+            .collect::<Vec<HashMap<_, _>>>();
+
+        self.write(&entries)?;
+        Ok(())
     }
 
     pub fn alter<N: Into<String> + Copy + PartialEq, T: Into<String>>(
@@ -258,6 +248,30 @@ impl<'a> Table<'a> {
             Err(TableError::TableNotFond(self.table_name.to_string()))
         } else {
             Ok(())
+        }
+    }
+
+    fn match_query(condition: &Option<Condition>, entry: &HashMap<String, String>) -> bool {
+        if condition.is_none() {
+            return true;
+        }
+
+        let Condition {
+            key,
+            value,
+            operator,
+        } = condition.as_ref().unwrap();
+
+        match entry.get(key) {
+            None => false,
+            Some(v) => match operator {
+                Operator::Eq => v == value,
+                Operator::NotEq => v != value,
+                Operator::Gt => v > value,
+                Operator::Lt => v < value,
+                Operator::GtEq => v >= value,
+                Operator::LtEq => v <= value,
+            },
         }
     }
 }
