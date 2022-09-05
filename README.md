@@ -6,24 +6,10 @@ Simple relational database written in **Rust**.
     <img src="./sql.png" title="SQL" alt="SQL"/>
 </p>
 
-## Featrues
+## Todo
 
-1. General
-   - Support common data types
-2. Database
-   - Create DB ✅
-   - Drop DB ✅
-   - Update DB Name 🚧
-3. Tables
-   - Create table ✅
-   - Define table schema ✅
-   - Validate table schema 🚧
-   - Drop table ✅
-   - Truncate table ✅
-   - Alter table ✅
-4. Query
-   - Insert into table ✅ (With validation 🚧)
-   - Query
+1. Add supported types
+2. Support **query & delete** under a given conditions.
 
 ## Commands
 

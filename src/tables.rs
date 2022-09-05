@@ -90,7 +90,22 @@ impl<'a> Table<'a> {
 
     pub fn select(&self, cols: SelectCols, condition: Option<String>) -> TableResult<TableEntries> {
         let all_entries = self.read()?;
-        Ok(all_entries)
+
+        let entries = all_entries
+            .into_iter()
+            .map(|entry| match &cols {
+                SelectCols::All => entry,
+                SelectCols::Cols(selectd_cols) => {
+                    let mut map = HashMap::new();
+                    selectd_cols.into_iter().for_each(|col| {
+                        map.insert(col.clone(), entry.get(col).unwrap().clone());
+                    });
+                    map
+                }
+            })
+            .collect::<Vec<HashMap<_, _>>>();
+
+        Ok(entries)
     }
 
     pub fn alter<N: Into<String> + Copy + PartialEq, T: Into<String>>(
