@@ -42,5 +42,4 @@ pub const RE_DELETE_FROM_TABLE: &str =
 pub const RE_SHOW_QUERY: &str = r"(?im)SHOW (?P<query>[^\n;]+)";
 
 /// A regex to extract key values like `lname = "Doe"` or `is_married = false`. [Example](https://regex101.com/r/GeblFE/1)
-pub const RE_KEY_VALUE: &str =
-    r#"(?im)^(?P<key>[^=\s]+)(\s*(?P<operator>[^\s\n;'"]+)\s*)('?"?)(?P<value>[^\s\n=";']+)('?"?)"#;
+pub const RE_KEY_VALUE: &str = r#"(?im)^(?P<key>[^=\s]+)(\s*(?P<operator>[^\s\n;'"0-9]+)\s*)('?"?)(?P<value>[^\s\n=";']+)('?"?)"#;

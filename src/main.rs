@@ -2,7 +2,7 @@ mod database;
 mod query_parser;
 mod query_planner;
 mod regex;
-mod tables;
+mod table;
 mod utils;
 
 use query_planner::{QueryPlanner, QueryPlannerError};

@@ -244,9 +244,9 @@ pub enum Operator {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Condition {
-    key: String,
-    value: String,
-    operator: Operator,
+    pub key: String,
+    pub value: String,
+    pub operator: Operator,
 }
 
 impl Condition {
@@ -486,7 +486,7 @@ mod tests {
 
     #[test]
     fn parse_select_statment_with_all_cols_and_condition() {
-        let query = QueryParser::parse("SELECT * FROM user WHERE age = 12").unwrap();
+        let query = QueryParser::parse("SELECT * FROM user WHERE age=12").unwrap();
 
         if let Query::Table {
             name,

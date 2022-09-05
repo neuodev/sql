@@ -5,7 +5,7 @@ use thiserror::Error;
 
 use crate::{
     database::{Database, DatabaseError},
-    query_parser::{Condition, SelectCols},
+    query_parser::{Condition, Operator, SelectCols},
     utils::{get_db_path, get_schema_path, get_table_path},
 };
 
@@ -93,11 +93,33 @@ impl<'a> Table<'a> {
         cols: SelectCols,
         condition: Option<Condition>,
     ) -> TableResult<TableEntries> {
-        dbg!(&condition);
         let all_entries = self.read()?;
 
         let entries = all_entries
             .into_iter()
+            .filter(|e| {
+                if condition.is_none() {
+                    return true;
+                }
+
+                let Condition {
+                    key,
+                    value,
+                    operator,
+                } = condition.as_ref().unwrap();
+
+                match e.get(key) {
+                    None => false,
+                    Some(v) => match operator {
+                        Operator::Eq => v == value,
+                        Operator::NotEq => v != value,
+                        Operator::Gt => v > value,
+                        Operator::Lt => v < value,
+                        Operator::GtEq => v >= value,
+                        Operator::LtEq => v <= value,
+                    },
+                }
+            })
             .map(|entry| match &cols {
                 SelectCols::All => entry,
                 SelectCols::Cols(selectd_cols) => {

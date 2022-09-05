@@ -9,7 +9,7 @@ use crate::{
     database::DB_DIR,
     query_parser::SelectCols,
     regex::RE_COMMA_SEPARATED_VALUES,
-    tables::{Table, TableEntries},
+    table::{Table, TableEntries},
 };
 
 pub fn get_db_path(name: &str) -> PathBuf {

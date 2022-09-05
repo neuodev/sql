@@ -1,7 +1,7 @@
 use crate::{
     database::{Database, DatabaseError},
     query_parser::{DatabaseAction, Query, QueryParser, QueryParserError, TableQuery},
-    tables::{Table, TableError},
+    table::{Table, TableError},
     utils::display_entries,
 };
 use inquire::{validator::Validation, InquireError, Text};
