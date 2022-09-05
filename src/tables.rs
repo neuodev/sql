@@ -141,6 +141,7 @@ impl<'a> Table<'a> {
         datatype: T,
     ) -> TableResult<()> {
         // todo: Every column should be unique
+        // TODO: Add the new column to the data with the default value of this type
         let mut schema = self.read_schema()?;
         schema.cols.push(col_name.into());
         schema.types.push(datatype.into());
@@ -151,6 +152,7 @@ impl<'a> Table<'a> {
     }
 
     pub fn remove_col<T: Into<String> + Copy>(&self, col_name: T) -> TableResult<()> {
+        // Todo: Col should be removed from the table
         let mut schema = self.read_schema()?;
         let pos = schema.cols.iter().position(|c| c == &col_name.into());
 
