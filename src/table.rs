@@ -113,12 +113,13 @@ impl<'a> Table<'a> {
         Ok(entries)
     }
 
-    pub fn delete(&self, condition: Option<Condition>) -> TableResult<()> {
+    pub fn delete(&self, condition: Condition) -> TableResult<()> {
         let all_entries = self.read()?;
+        let condition = Some(condition);
 
         let entries = all_entries
             .into_iter()
-            .filter(|e| Table::match_query(&condition, e))
+            .filter(|e| !Table::match_query(&condition, e))
             .collect::<Vec<HashMap<_, _>>>();
 
         self.write(&entries)?;

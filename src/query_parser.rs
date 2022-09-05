@@ -42,7 +42,7 @@ pub enum TableQuery {
         values: Vec<Vec<String>>,
     },
     Delete {
-        condition: String,
+        condition: Condition,
     },
 }
 
@@ -220,11 +220,10 @@ impl QueryParser {
 
         let re_delete = Regex::new(RE_DELETE_FROM_TABLE).unwrap();
         if let Some(caps) = re_delete.captures(query) {
+            let condition = Condition::parse(&caps["condition"])?;
             return Ok(Query::Table {
                 name: caps["table_name"].to_string(),
-                query: TableQuery::Delete {
-                    condition: caps["condition"].to_string(),
-                },
+                query: TableQuery::Delete { condition },
             });
         }
 
@@ -617,7 +616,14 @@ mod tests {
         } = query
         {
             assert_eq!(name, "table_name".to_string());
-            assert_eq!(condition, "name=jone".to_string());
+            assert_eq!(
+                condition,
+                Condition {
+                    key: "name".into(),
+                    value: "jone".into(),
+                    operator: Operator::Eq
+                }
+            );
         } else {
             panic!("Unexpected query")
         }

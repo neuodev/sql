@@ -112,7 +112,7 @@ impl QueryPlanner {
                         }
                     }
                     TableQuery::Insert { cols, values } => table.insert(cols, values)?,
-                    TableQuery::Delete { condition } => todo!(),
+                    TableQuery::Delete { condition } => table.delete(condition)?,
                 }
             }
             Query::ShowAllDBs => Database::get_dbs()?.iter().for_each(|db| {
