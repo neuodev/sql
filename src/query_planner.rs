@@ -92,7 +92,7 @@ impl QueryPlanner {
             Query::Table { name, query } => {
                 let table = Table::new(&curr_db, &name)?;
                 match query {
-                    TableQuery::Create { cols } => table.create(&cols)?,
+                    TableQuery::Create { cols, types } => table.create(cols, types)?,
                     TableQuery::DropTable => table.drop()?,
                     TableQuery::Truncate => table.truncate()?,
                     TableQuery::DropCol(col) => table.remove_col(col)?,

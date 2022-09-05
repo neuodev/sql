@@ -21,7 +21,8 @@ pub enum DatabaseAction {
 #[derive(Debug, PartialEq, Eq)]
 pub enum TableQuery {
     Create {
-        cols: HashMap<String, String>,
+        cols: Vec<String>,
+        types: Vec<String>,
     },
     DropTable,
     Truncate,
@@ -112,14 +113,16 @@ impl QueryParser {
         if let Some(caps) = re_create_table.captures(query) {
             let table_name = caps["name"].to_string();
             let re_entries = Regex::new(RE_TABLE_ENTRIES).unwrap();
-            let mut cols = HashMap::new();
+            let mut types = Vec::new();
+            let mut cols = Vec::new();
             re_entries.captures_iter(&caps["entries"]).for_each(|caps| {
-                cols.insert(caps["col_name"].into(), caps["col_type"].into());
+                cols.push(caps["col_type"].to_string());
+                cols.push(caps["col_name"].to_string())
             });
 
             return Ok(Query::Table {
                 name: table_name,
-                query: TableQuery::Create { cols },
+                query: TableQuery::Create { cols, types },
             });
         }
 
@@ -285,13 +288,16 @@ mod tests {
         let query = QueryParser::parse("CREATE TABLE user(id int, name varchar, age int)").unwrap();
         if let Query::Table {
             name,
-            query: TableQuery::Create { cols },
+            query: TableQuery::Create { cols, types },
         } = query
         {
             assert_eq!(name, "user".to_string());
-            assert_eq!(cols.get("age").unwrap(), "int");
-            assert_eq!(cols.get("name").unwrap(), "varchar");
-            assert_eq!(cols.get("id").unwrap(), "int");
+            assert_eq!(cols[0], "id".to_string());
+            assert_eq!(cols[1], "name".to_string());
+            assert_eq!(cols[2], "age".to_string());
+            assert_eq!(types[0], "int".to_string());
+            assert_eq!(types[1], "varchar".to_string());
+            assert_eq!(types[2], "int".to_string());
         } else {
             panic!("Unexpected query");
         }
@@ -301,21 +307,24 @@ mod tests {
     fn create_table_multi_line_query() {
         let query = QueryParser::parse(
             r#"CREATE TABLE t_name (
-                column1 datatype,
-                column2 datatype,
-                column3 datatype,
+                column1 datatype1,
+                column2 datatype2,
+                column3 datatype2,
                );"#,
         )
         .unwrap();
         if let Query::Table {
             name,
-            query: TableQuery::Create { cols },
+            query: TableQuery::Create { cols, types },
         } = query
         {
             assert_eq!(name, "t_name".to_string());
-            assert_eq!(cols.get("column1").unwrap(), "datatype");
-            assert_eq!(cols.get("column2").unwrap(), "datatype");
-            assert_eq!(cols.get("column3").unwrap(), "datatype");
+            assert_eq!(cols[0], "column1".to_string());
+            assert_eq!(cols[1], "column1".to_string());
+            assert_eq!(cols[2], "column2".to_string());
+            assert_eq!(types[0], "datatype1".to_string());
+            assert_eq!(types[1], "datatype2".to_string());
+            assert_eq!(types[2], "datatype3".to_string());
         } else {
             panic!("Unexpected query");
         }

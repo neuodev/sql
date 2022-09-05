@@ -39,16 +39,16 @@ impl<'a> Table<'a> {
         Ok(Self { db, table_name })
     }
 
-    pub fn create(&self, cols: &HashMap<String, String>) -> TableResult<()> {
-        let fields = json!({ "fields": cols });
-        let fields = serde_json::to_string_pretty(&fields)?;
+    pub fn create(&self, cols: Vec<String>, types: Vec<String>) -> TableResult<()> {
+        let schema = json!({ "cols": cols, "types": types });
+        let schema = serde_json::to_string_pretty(&schema)?;
 
         Database::exists_or_err(self.db)?;
 
         let db_path = get_db_path(self.db);
         let schema_file = db_path.join(format!("{}.schema.json", self.table_name));
         let table_file = db_path.join(format!("{}.json", self.table_name));
-        fs::write(schema_file, fields.as_bytes())?;
+        fs::write(schema_file, schema.as_bytes())?;
         fs::write(table_file, "[]")?;
         Ok(())
     }
