@@ -1,5 +1,4 @@
 use regex::Regex;
-use std::collections::HashMap;
 use thiserror::Error;
 
 use crate::{
@@ -7,7 +6,6 @@ use crate::{
     utils::{get_cols, get_comma_separated_values},
 };
 
-pub type TableName = String;
 pub type ColName = String;
 pub type ColType = String; // Todo: Should be an enum
 
@@ -77,6 +75,10 @@ pub enum QueryParserError {
     InvalidDBAction(String),
     #[error("Invalid query")]
     InvalidTableAction(String),
+    #[error("Invalid condition")]
+    InvalidCondition(String),
+    #[error("Invalid Operator")]
+    InvalidOperator(String),
 }
 
 pub struct QueryParser;
@@ -226,6 +228,54 @@ impl QueryParser {
         }
 
         Err(QueryParserError::BadQuery(query.to_string()))
+    }
+}
+
+#[derive(Debug)]
+pub enum Operator {
+    Eq,
+    NotEq,
+    Gt,
+    Lt,
+    GtEq,
+    LtEq,
+}
+
+#[derive(Debug)]
+pub struct Condition {
+    key: String,
+    value: String,
+    operator: Operator,
+}
+
+impl Condition {
+    fn parse(query: &str) -> Result<Condition, QueryParserError> {
+        let re = Regex::new(RE_KEY_VALUE).unwrap();
+
+        match re.captures(query) {
+            Some(caps) => {
+                let operator = match &caps["operator"] {
+                    "=" => Operator::Eq,
+                    "!=" => Operator::NotEq,
+                    ">" => Operator::Gt,
+                    ">=" => Operator::GtEq,
+                    "<" => Operator::Lt,
+                    "<=" => Operator::LtEq,
+                    _ => {
+                        return Err(QueryParserError::InvalidOperator(
+                            caps["operator"].to_string(),
+                        ))
+                    }
+                };
+
+                Ok(Condition {
+                    key: caps["key"].to_string(),
+                    value: caps["value"].to_string(),
+                    operator,
+                })
+            }
+            None => Err(QueryParserError::InvalidCondition(query.to_string())),
+        }
     }
 }
 
