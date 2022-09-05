@@ -95,7 +95,7 @@ impl QueryPlanner {
                     TableQuery::Create { cols, types } => table.create(cols, types)?,
                     TableQuery::DropTable => table.drop()?,
                     TableQuery::Truncate => table.truncate()?,
-                    TableQuery::DropCol(col) => table.remove_col(col)?,
+                    TableQuery::DropCol(col) => table.remove_col(&col)?,
                     TableQuery::AlterCol { col_name, datatype } => {
                         table.alter(&col_name, datatype)?
                     }

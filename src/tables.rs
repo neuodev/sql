@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::{collections::HashMap, fs, io, ops::Index};
+use std::{collections::HashMap, f32::consts::E, fs, io, ops::Index};
 use thiserror::Error;
 
 use crate::{
@@ -102,7 +102,7 @@ impl<'a> Table<'a> {
         // Update schema
         self.exists_or_err()?;
         let mut schema = self.read_schema()?;
-        let p = schema.cols.iter().position(|&c| c == col_name.into());
+        let p = schema.cols.iter().position(|c| c == &col_name.into());
 
         match p {
             None => Err(TableError::ColNotFound(col_name.into())),
@@ -140,17 +140,31 @@ impl<'a> Table<'a> {
         col_name: N,
         datatype: T,
     ) -> TableResult<()> {
+        // todo: Every column should be unique
         let mut schema = self.read_schema()?;
-        schema.fields.insert(col_name.into(), datatype.into());
+        schema.cols.push(col_name.into());
+        schema.types.push(datatype.into());
+
+        debug_assert_eq!(schema.cols.len(), schema.types.len());
         self.write_schema(schema)?;
         Ok(())
     }
 
-    pub fn remove_col<T: Into<String>>(&self, col_name: T) -> TableResult<()> {
+    pub fn remove_col<T: Into<String> + Copy>(&self, col_name: T) -> TableResult<()> {
         let mut schema = self.read_schema()?;
-        schema.fields.remove_entry(&col_name.into());
-        self.write_schema(schema)?;
-        Ok(())
+        let pos = schema.cols.iter().position(|c| c == &col_name.into());
+
+        match pos {
+            Some(pos) => {
+                schema.cols.remove(pos);
+                schema.types.remove(pos);
+
+                debug_assert_eq!(schema.cols.len(), schema.types.len());
+                self.write_schema(schema)?;
+                Ok(())
+            }
+            None => Err(TableError::ColNotFound(col_name.into())),
+        }
     }
 
     fn read(&self) -> Result<TableEntries, TableError> {
