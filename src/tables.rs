@@ -89,6 +89,7 @@ impl<'a> Table<'a> {
     }
 
     pub fn select(&self, cols: SelectCols, condition: Option<String>) -> TableResult<TableEntries> {
+        dbg!(&condition);
         let all_entries = self.read()?;
 
         let entries = all_entries

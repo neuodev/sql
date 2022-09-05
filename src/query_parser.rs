@@ -425,6 +425,25 @@ mod tests {
             panic!("Unexpected query")
         }
     }
+
+    #[test]
+    fn parse_select_statment_with_all_cols_and_condition() {
+        let query = QueryParser::parse("SELECT * FROM user WHERE age=12").unwrap();
+
+        if let Query::Table {
+            name,
+            query: TableQuery::Select { cols, condition },
+        } = query
+        {
+            assert_eq!(name, "user".to_string());
+            assert_eq!(cols, SelectCols::All);
+            assert!(condition.is_some());
+            assert_eq!(condition.unwrap(), "age=12");
+        } else {
+            panic!("Unexpected query")
+        }
+    }
+
     #[test]
     fn parse_select_statment() {
         let query = QueryParser::parse("SELECT id,name FROM user").unwrap();

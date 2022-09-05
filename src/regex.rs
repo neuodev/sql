@@ -38,5 +38,9 @@ pub const RE_INSERT_VALUES_VALUES: &str = r"(?im)(?P<row>\([^\);]+\))";
 pub const RE_DELETE_FROM_TABLE: &str =
     r"(?im)delete from (?P<table_name>[^\s]+) where (?P<condition>[^\n;]+)";
 
-/// A regex to 'SHOW' queries like `SHOW DATABASES` or `SHOW TABLES`. [Example](https://regex101.com/r/bbs4lA/1)
+/// A regex to match 'SHOW' queries like `SHOW DATABASES` or `SHOW TABLES`. [Example](https://regex101.com/r/bbs4lA/1)
 pub const RE_SHOW_QUERY: &str = r"(?im)SHOW (?P<query>[^\n;]+)";
+
+/// A regex to extract key values like `lname = "Doe"` or `is_married = false`. [Example](https://regex101.com/r/bbs4lA/1)
+pub const RE_KEY_VALUE: &str =
+    r#"(?im)(?P<key>[^=\s]+)(\s*=\s*)('?"?)(?P<value>[^\s\n=";']+)('?"?)"#;

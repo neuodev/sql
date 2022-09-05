@@ -106,7 +106,7 @@ impl QueryPlanner {
                         let entries = table.select(cols, condition)?;
 
                         if entries.is_empty() {
-                            println!("No entries")
+                            println!("\tNo entries")
                         } else {
                             display_entries(entries);
                         }
