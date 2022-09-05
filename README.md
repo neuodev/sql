@@ -9,8 +9,7 @@ Simple relational database written in **Rust**.
 ## Todo
 
 1. Add supported types
-2. Support **query & delete** under a given conditions.
-3. Fix side effects of altering the table columns
+2. Fix side effects of altering the table columns
 
 ## Commands
 
@@ -107,8 +106,3 @@ WHERE condition;
 ```sql
 DELETE FROM table_name WHERE condition;
 ```
-
-# Todo
-
-- Use CSV files so you can only append to the file (no need to read first)
-- Use `Path` to interact with the file system
