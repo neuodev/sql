@@ -185,4 +185,54 @@ mod tests {
         let dt = DataType::parse(r#"ENUM(HUMAND, ALIEN)"#).unwrap();
         assert_eq!(dt, DataType::ENUM(vec!["HUMAND".into(), "ALIEN".into(),]));
     }
+
+    #[test]
+    fn validate_datatypes() {
+        let datatypes = [
+            (DataType::BOOLEAN, "true"),
+            (DataType::FLOAT, "1.00"),
+            (
+                DataType::ENUM(vec!["HUMAN".into(), "ALIAN".into()]),
+                "HUMAN",
+            ),
+            (DataType::INTEGER, "21"),
+        ];
+
+        datatypes
+            .into_iter()
+            .for_each(|(dtype, value)| assert!(dtype.is_valid(value).is_ok()))
+    }
+
+    #[test]
+    fn check_invalid_datatypes() {
+        let datatypes = [
+            (
+                DataType::BOOLEAN,
+                "something",
+                DataTypesErr::InvalidBool("`something` is not a valid boolean".into()),
+            ),
+            (
+                DataType::FLOAT,
+                "str",
+                DataTypesErr::InvalidFloat("'str' is not a valid FLOAT".into()),
+            ),
+            (
+                DataType::ENUM(vec!["HUMAN".into(), "ALIAN".into()]),
+                "ANIMAL",
+                DataTypesErr::InvalidEnum(
+                    "`ANIMAL` is not valid enum. must be one of these [\"HUMAN\", \"ALIAN\"]"
+                        .into(),
+                ),
+            ),
+            (
+                DataType::INTEGER,
+                "int",
+                DataTypesErr::InvalidInt("'int' is not a valid INTEGER".into()),
+            ),
+        ];
+
+        datatypes
+            .into_iter()
+            .for_each(|(dtype, value, err_msg)| assert_eq!(dtype.is_valid(value), Err(err_msg)))
+    }
 }
