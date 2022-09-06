@@ -1,9 +1,16 @@
+use std::num::ParseIntError;
+
+use regex::Regex;
 use thiserror::Error;
+
+use crate::regex::{RE_ENUM, RE_ENUM_VALUES, RE_VARCHAR};
 
 #[derive(Debug, Error, PartialEq, Eq)]
 pub enum DataTypesErr {
     #[error("Invalid Type")]
     InvalidType(String),
+    #[error("Invalid varchar Type")]
+    InvalidVarchar(#[from] ParseIntError),
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -23,7 +30,28 @@ pub enum DataType {
 
 impl DataType {
     fn parse(datatype: &str) -> Result<Self, DataTypesErr> {
+        let re_varchar = Regex::new(RE_VARCHAR).unwrap();
+        let re_enum = Regex::new(RE_ENUM).unwrap();
+        let re_enum_values = Regex::new(RE_ENUM_VALUES).unwrap();
         let dt = datatype.trim();
+
+        if let Some(caps) = re_varchar.captures(dt) {
+            let size = match caps["size"].parse::<u32>() {
+                Ok(s) => s,
+                Err(e) => return Err(DataTypesErr::InvalidVarchar(e)),
+            };
+            return Ok(DataType::VARCHAR(size));
+        }
+
+        if let Some(caps) = re_enum.captures(dt) {
+            let values = re_enum_values
+                .captures_iter(&caps["values"])
+                .map(|caps| caps["value"].to_string())
+                .filter(|v| !v.is_empty())
+                .collect::<Vec<_>>();
+            return Ok(DataType::ENUM(values));
+        }
+
         let dt = match dt {
             _ if DataType::INTEGER.as_str() == dt => DataType::INTEGER,
             _ if DataType::INT.as_str() == dt => DataType::INT,
@@ -32,6 +60,7 @@ impl DataType {
             _ if DataType::TEXT.as_str() == dt => DataType::TEXT,
             _ if DataType::BOOLEAN.as_str() == dt => DataType::BOOLEAN,
             _ if DataType::BOOL.as_str() == dt => DataType::BOOL,
+
             _ => return Err(DataTypesErr::InvalidType(dt.to_string())),
         };
 
