@@ -100,7 +100,7 @@ impl QueryPlanner {
                         table.alter(&col_name, datatype)?
                     }
                     TableQuery::AddCol { col_name, datatype } => {
-                        table.add_col(col_name, datatype)?
+                        table.add_col(&col_name, datatype)?
                     }
                     TableQuery::Select { cols, condition } => {
                         let entries = table.select(cols, condition)?;

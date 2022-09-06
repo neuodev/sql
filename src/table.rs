@@ -6,6 +6,7 @@ use thiserror::Error;
 use crate::{
     database::{Database, DatabaseError},
     query_parser::{Condition, Operator, SelectCols},
+    types::DataType,
     utils::{get_db_path, get_schema_path, get_table_path},
 };
 
@@ -126,23 +127,19 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
-    pub fn alter<N: Into<String> + Copy + PartialEq, T: Into<String>>(
-        &self,
-        col_name: N,
-        datatype: T,
-    ) -> TableResult<()> {
+    pub fn alter(&self, col_name: &str, datatype: DataType) -> TableResult<()> {
         // Todo: Update the actual table
         // Update schema
         self.exists_or_err()?;
         let mut schema = self.read_schema()?;
-        let p = schema.cols.iter().position(|c| c == &col_name.into());
+        let p = schema.cols.iter().position(|c| c == &col_name.to_string());
 
         match p {
             None => Err(TableError::ColNotFound(col_name.into())),
             Some(pos) => match schema.types.get(pos) {
                 None => Err(TableError::ColTypeNotFound(col_name.into())),
                 Some(_) => {
-                    schema.types[pos] = datatype.into();
+                    schema.types[pos] = datatype.as_string();
                     self.write_schema(schema)?;
 
                     Ok(())
@@ -168,16 +165,12 @@ impl<'a> Table<'a> {
         Ok(())
     }
 
-    pub fn add_col<N: Into<String>, T: Into<String>>(
-        &self,
-        col_name: N,
-        datatype: T,
-    ) -> TableResult<()> {
+    pub fn add_col(&self, col_name: &str, datatype: DataType) -> TableResult<()> {
         // todo: Every column should be unique
         // TODO: Add the new column to the data with the default value of this type
         let mut schema = self.read_schema()?;
         schema.cols.push(col_name.into());
-        schema.types.push(datatype.into());
+        schema.types.push(datatype.as_string());
 
         debug_assert_eq!(schema.cols.len(), schema.types.len());
         self.write_schema(schema)?;

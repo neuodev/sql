@@ -29,7 +29,7 @@ pub enum DataType {
 }
 
 impl DataType {
-    fn parse(datatype: &str) -> Result<Self, DataTypesErr> {
+    pub fn parse(datatype: &str) -> Result<Self, DataTypesErr> {
         let re_varchar = Regex::new(RE_VARCHAR).unwrap();
         let re_enum = Regex::new(RE_ENUM).unwrap();
         let re_enum_values = Regex::new(RE_ENUM_VALUES).unwrap();
@@ -56,14 +56,15 @@ impl DataType {
             return Ok(DataType::ENUM(values));
         }
 
+        let dt = dt.to_lowercase();
         let dt = match dt {
-            _ if DataType::INTEGER.as_str() == dt => DataType::INTEGER,
-            _ if DataType::INT.as_str() == dt => DataType::INT,
-            _ if DataType::FLOAT.as_str() == dt => DataType::FLOAT,
-            _ if DataType::DEC.as_str() == dt => DataType::DEC,
-            _ if DataType::TEXT.as_str() == dt => DataType::TEXT,
-            _ if DataType::BOOLEAN.as_str() == dt => DataType::BOOLEAN,
-            _ if DataType::BOOL.as_str() == dt => DataType::BOOL,
+            _ if DataType::INTEGER.as_string() == dt => DataType::INTEGER,
+            _ if DataType::INT.as_string() == dt => DataType::INT,
+            _ if DataType::FLOAT.as_string() == dt => DataType::FLOAT,
+            _ if DataType::DEC.as_string() == dt => DataType::DEC,
+            _ if DataType::TEXT.as_string() == dt => DataType::TEXT,
+            _ if DataType::BOOLEAN.as_string() == dt => DataType::BOOLEAN,
+            _ if DataType::BOOL.as_string() == dt => DataType::BOOL,
 
             _ => return Err(DataTypesErr::InvalidType(dt.to_string())),
         };
@@ -71,7 +72,7 @@ impl DataType {
         return Ok(dt);
     }
 
-    fn as_str(&self) -> String {
+    pub fn as_string(&self) -> String {
         format!("{:?}", self)
     }
 }
@@ -84,16 +85,20 @@ mod tests {
 
     #[test]
     fn should_convert_datatypes_as_str() {
-        assert_eq!(DataType::BOOL.as_str(), "BOOL");
-        assert_eq!(DataType::INTEGER.as_str(), "INTEGER");
-        assert_eq!(DataType::VARCHAR(12).as_str(), "VARCHAR(12)");
+        assert_eq!(DataType::BOOL.as_string(), "BOOL");
+        assert_eq!(DataType::INTEGER.as_string(), "INTEGER");
+        assert_eq!(DataType::VARCHAR(12).as_string(), "VARCHAR(12)");
     }
 
     #[test]
     fn parse_as_integer() {
         let dt = DataType::parse(" INTEGER ");
         assert!(dt.is_ok());
-        assert_eq!(dt.unwrap(), DataType::INTEGER)
+        assert_eq!(dt.unwrap(), DataType::INTEGER);
+
+        let dt = DataType::parse(" int ");
+        assert!(dt.is_ok());
+        assert_eq!(dt.unwrap(), DataType::INT)
     }
 
     #[test]

@@ -3,11 +3,11 @@ use thiserror::Error;
 
 use crate::{
     regex::*,
+    types::{DataType, DataTypesErr},
     utils::{get_cols, get_comma_separated_values},
 };
 
 pub type ColName = String;
-pub type ColType = String; // Todo: Should be an enum
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum DatabaseAction {
@@ -26,11 +26,11 @@ pub enum TableQuery {
     Truncate,
     AddCol {
         col_name: String,
-        datatype: ColType,
+        datatype: DataType,
     },
     AlterCol {
         col_name: String,
-        datatype: ColType,
+        datatype: DataType,
     },
     DropCol(ColName),
     Select {
@@ -79,6 +79,8 @@ pub enum QueryParserError {
     InvalidCondition(String),
     #[error("Invalid Operator")]
     InvalidOperator(String),
+    #[error("Data type error")]
+    DataTypeErr(#[from] DataTypesErr),
 }
 
 pub struct QueryParser;
@@ -167,7 +169,7 @@ impl QueryParser {
                 name: caps["table_name"].to_string(),
                 query: TableQuery::AlterCol {
                     col_name: caps["col_name"].to_string(),
-                    datatype: caps["datatype"].to_string(),
+                    datatype: DataType::parse(&caps["datatype"])?,
                 },
             });
         }
@@ -178,7 +180,7 @@ impl QueryParser {
                 name: caps["table_name"].to_string(),
                 query: TableQuery::AddCol {
                     col_name: caps["col_name"].to_string(),
-                    datatype: caps["datatype"].to_string(),
+                    datatype: DataType::parse(&caps["datatype"])?,
                 },
             });
         }
@@ -281,7 +283,10 @@ impl Condition {
 
 #[cfg(test)]
 mod tests {
-    use crate::query_parser::{Condition, DatabaseAction, Operator, Query, SelectCols, TableQuery};
+    use crate::{
+        query_parser::{Condition, DatabaseAction, Operator, Query, SelectCols, TableQuery},
+        types::DataType,
+    };
 
     use super::{QueryParser, QueryParserError};
 
@@ -426,7 +431,7 @@ mod tests {
 
     #[test]
     fn alter_col() {
-        let query = QueryParser::parse("ALTER TABLE demo ALTER COLUMN id uuid").unwrap();
+        let query = QueryParser::parse("ALTER TABLE demo ALTER COLUMN id int").unwrap();
 
         if let Query::Table {
             name,
@@ -435,7 +440,7 @@ mod tests {
         {
             assert_eq!(name, "demo".to_string());
             assert_eq!(col_name, "id".to_string());
-            assert_eq!(datatype, "uuid".to_string());
+            assert_eq!(datatype, DataType::INT);
         } else {
             panic!("Unexpted query")
         }
@@ -443,7 +448,7 @@ mod tests {
 
     #[test]
     fn add_col() {
-        let query = QueryParser::parse("ALTER TABLE demo ADD id uuid").unwrap();
+        let query = QueryParser::parse("ALTER TABLE demo ADD id TEXT").unwrap();
 
         if let Query::Table {
             name,
@@ -452,7 +457,7 @@ mod tests {
         {
             assert_eq!(name, "demo".to_string());
             assert_eq!(col_name, "id".to_string());
-            assert_eq!(datatype, "uuid".to_string());
+            assert_eq!(datatype, DataType::TEXT);
         } else {
             panic!("Unexpted query")
         }
