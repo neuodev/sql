@@ -605,7 +605,7 @@ mod tests {
     #[test]
     fn delete_from_table() {
         let query = QueryParser::parse(
-            "DELETE FROM table_name WHERE name=jone;
+            "DELETE FROM table_name WHERE name = jone;
         ",
         )
         .unwrap();

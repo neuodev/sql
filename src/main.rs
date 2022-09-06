@@ -3,6 +3,7 @@ mod query_parser;
 mod query_planner;
 mod regex;
 mod table;
+mod types;
 mod utils;
 
 use query_planner::{QueryPlanner, QueryPlannerError};
