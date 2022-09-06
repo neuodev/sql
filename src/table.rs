@@ -31,11 +31,12 @@ pub enum TableError {
     ColNotFound(String),
     #[error("Column type  not found")]
     ColTypeNotFound(String),
+    #[error("Number of columns doesn't match number of vlaues")]
+    NumberMismatch(String),
 }
 
 type TableResult<T> = Result<T, TableError>;
 
-// Todo: Add table builder
 impl<'a> Table<'a> {
     pub fn new(db: &'a str, table_name: &'a str) -> TableResult<Self> {
         Database::exists_or_err(db)?;
@@ -64,10 +65,19 @@ impl<'a> Table<'a> {
             SelectCols::All => self.read_schema()?.cols,
         };
 
+        for row in &values {
+            if row.len() != cols.len() {
+                return Err(TableError::NumberMismatch(format!(
+                    "{} != {}",
+                    row.len(),
+                    cols.len()
+                )));
+            }
+        }
+
         let new_entries = values
             .into_iter()
             .map(|row| {
-                assert_eq!(row.len(), cols.len());
                 let mut map = HashMap::new();
                 cols.iter().zip(row).for_each(|(k, v)| {
                     map.insert(k.clone(), v);
