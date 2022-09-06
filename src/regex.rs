@@ -46,4 +46,4 @@ pub const RE_VARCHAR: &str = r#"(?im)VARCHAR\(?(?P<size>[0-9]+)?\)?"#;
 /// A regex to match enums. [Example](https://regex101.com/r/RuRnxp/1)
 pub const RE_ENUM: &str = r#"(?im)ENUM\((?P<values>.+)\)"#;
 /// A regex to extract enum values. [Example](https://regex101.com/r/2O8ZbK/1)
-pub const RE_ENUM_VALUES: &str = r#"(?im)/('|")?(?P<value>[^'"\n,]+)('|")?/gmi"#;
+pub const RE_ENUM_VALUES: &str = r#"(?im)('|")?(?P<value>[^'"\n,]+)('|")?"#;

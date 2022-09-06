@@ -36,17 +36,21 @@ impl DataType {
         let dt = datatype.trim();
 
         if let Some(caps) = re_varchar.captures(dt) {
-            let size = match caps["size"].parse::<u32>() {
-                Ok(s) => s,
-                Err(e) => return Err(DataTypesErr::InvalidVarchar(e)),
+            let size = match caps.name("size") {
+                Some(_) => match caps["size"].parse::<u32>() {
+                    Ok(s) => s,
+                    Err(e) => return Err(DataTypesErr::InvalidVarchar(e)),
+                },
+                None => 255,
             };
+
             return Ok(DataType::VARCHAR(size));
         }
 
         if let Some(caps) = re_enum.captures(dt) {
             let values = re_enum_values
                 .captures_iter(&caps["values"])
-                .map(|caps| caps["value"].to_string())
+                .map(|caps| caps["value"].trim().to_string())
                 .filter(|v| !v.is_empty())
                 .collect::<Vec<_>>();
             return Ok(DataType::ENUM(values));
@@ -104,5 +108,41 @@ mod tests {
         let dt = DataType::parse(" Cool ");
         assert!(dt.is_err());
         assert_eq!(dt, Err(DataTypesErr::InvalidType("Cool".into())));
+    }
+
+    #[test]
+    fn parse_varchar_with_size() {
+        let dt = DataType::parse("varchar(12)").unwrap();
+        assert_eq!(dt, DataType::VARCHAR(12));
+    }
+
+    #[test]
+    fn parse_varchar_with_default_size() {
+        let dt = DataType::parse("varchar").unwrap();
+        assert_eq!(dt, DataType::VARCHAR(255));
+    }
+
+    #[test]
+    fn parse_enum_values() {
+        let dt = DataType::parse("ENUM(1, 2, 3)").unwrap();
+        assert_eq!(dt, DataType::ENUM(vec!["1".into(), "2".into(), "3".into()]));
+    }
+
+    #[test]
+    fn parse_enum_values_with_single_quotes() {
+        let dt = DataType::parse("ENUM('HUMAND', 'ALIEN')").unwrap();
+        assert_eq!(dt, DataType::ENUM(vec!["HUMAND".into(), "ALIEN".into(),]));
+    }
+
+    #[test]
+    fn parse_enum_values_with_douple_quotes() {
+        let dt = DataType::parse(r#"ENUM("HUMAND", "ALIEN")"#).unwrap();
+        assert_eq!(dt, DataType::ENUM(vec!["HUMAND".into(), "ALIEN".into(),]));
+    }
+
+    #[test]
+    fn parse_enum_values_with_no_quotes() {
+        let dt = DataType::parse(r#"ENUM(HUMAND, ALIEN)"#).unwrap();
+        assert_eq!(dt, DataType::ENUM(vec!["HUMAND".into(), "ALIEN".into(),]));
     }
 }
