@@ -1,6 +1,7 @@
 use std::num::ParseIntError;
 
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::regex::{RE_ENUM, RE_ENUM_VALUES, RE_VARCHAR};
@@ -13,7 +14,7 @@ pub enum DataTypesErr {
     InvalidVarchar(#[from] ParseIntError),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum DataType {
     // Numeric datatypes
     INTEGER,

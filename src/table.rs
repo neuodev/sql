@@ -42,7 +42,7 @@ impl<'a> Table<'a> {
         Ok(Self { db, table_name })
     }
 
-    pub fn create(&self, cols: Vec<String>, types: Vec<String>) -> TableResult<()> {
+    pub fn create(&self, cols: Vec<String>, types: Vec<DataType>) -> TableResult<()> {
         let schema = json!({ "cols": cols, "types": types });
         let schema = serde_json::to_string_pretty(&schema)?;
 
