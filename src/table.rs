@@ -6,7 +6,7 @@ use thiserror::Error;
 use crate::{
     database::{Database, DatabaseError},
     query_parser::{Condition, Operator, SelectCols},
-    types::DataType,
+    types::{DataType, DataTypesErr},
     utils::{get_db_path, get_schema_path, get_table_path},
 };
 
@@ -33,6 +33,8 @@ pub enum TableError {
     ColTypeNotFound(String),
     #[error("Number of columns doesn't match number of vlaues")]
     NumberMismatch(String),
+    #[error("Types error")]
+    TypeErr(#[from] DataTypesErr),
 }
 
 type TableResult<T> = Result<T, TableError>;
@@ -81,6 +83,7 @@ impl<'a> Table<'a> {
             col_type_map.insert(col, dtype);
         }
 
+        let mut new_entries = Vec::new();
         for (idx, row) in values.iter().enumerate() {
             if row.len() != cols.len() {
                 return Err(TableError::NumberMismatch(format!(
@@ -92,32 +95,24 @@ impl<'a> Table<'a> {
                 )));
             }
 
+            let mut map = HashMap::new();
             for (col, val) in cols.iter().zip(row) {
-                println!("col = {}, val={}, type = {:?}", col, val, col_type_map[col]);
+                col_type_map[col].is_valid(val)?;
+                map.insert(col.clone(), val.clone());
             }
+
+            new_entries.push(map);
         }
 
-        // let new_entries = values
-        //     .into_iter()
-        //     .map(|row| {
-        //         let mut map = HashMap::new();
-        //         cols.iter().zip(row).for_each(|(k, v)| {
-        //             map.insert(k.clone(), v);
-        //         });
-
-        //         map
-        //     })
-        //     .collect::<Vec<HashMap<_, _>>>();
-
-        // let mut all_entries = self.read()?;
-        // all_entries.extend(new_entries);
-        // println!(
-        //     "[{}@{}] {:?} entry",
-        //     self.table_name,
-        //     self.db,
-        //     all_entries.len()
-        // );
-        // self.write(&all_entries)?;
+        let mut all_entries = self.read()?;
+        all_entries.extend(new_entries);
+        println!(
+            "[{}@{}] {:?} entry",
+            self.table_name,
+            self.db,
+            all_entries.len()
+        );
+        self.write(&all_entries)?;
         Ok(())
     }
 
