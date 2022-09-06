@@ -56,7 +56,7 @@ impl DataType {
             return Ok(DataType::ENUM(values));
         }
 
-        let dt = dt.to_lowercase();
+        let dt = dt.to_uppercase();
         let dt = match dt {
             _ if DataType::INTEGER.as_string() == dt => DataType::INTEGER,
             _ if DataType::INT.as_string() == dt => DataType::INT,
@@ -66,7 +66,7 @@ impl DataType {
             _ if DataType::BOOLEAN.as_string() == dt => DataType::BOOLEAN,
             _ if DataType::BOOL.as_string() == dt => DataType::BOOL,
 
-            _ => return Err(DataTypesErr::InvalidType(dt.to_string())),
+            _ => return Err(DataTypesErr::InvalidType(datatype.trim().into())),
         };
 
         return Ok(dt);
