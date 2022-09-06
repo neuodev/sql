@@ -37,9 +37,13 @@ pub const RE_INSERT_VALUES_VALUES: &str = r"(?im)(?P<row>\([^\);]+\))";
 /// A regex to match delete from table queries. [Example](https://regex101.com/r/RQEPGa/1)
 pub const RE_DELETE_FROM_TABLE: &str =
     r"(?im)delete from (?P<table_name>[^\s]+) where (?P<condition>[^\n;]+)";
-
 /// A regex to match 'SHOW' queries like `SHOW DATABASES` or `SHOW TABLES`. [Example](https://regex101.com/r/bbs4lA/1)
 pub const RE_SHOW_QUERY: &str = r"(?im)SHOW (?P<query>[^\n;]+)";
-
 /// A regex to extract key values like `lname = "Doe"` or `is_married = false`. [Example](https://regex101.com/r/GeblFE/1)
 pub const RE_KEY_VALUE: &str = r#"(?im)^(?P<key>[^=\s]+)(\s*(?P<operator>[^\s\n;'"0-9]+)\s*)('?"?)(?P<value>[^\s\n=";']+)('?"?)"#;
+/// A regex to extract `VARCHAR` size like `VARCHAR(255)`. [Example](https://regex101.com/r/aQHauk/1)
+pub const RE_VARCHAR: &str = r#"(?im)VARCHAR\(?(?P<size>[0-9]+)?\)?"#;
+/// A regex to match enums. [Example](https://regex101.com/r/RuRnxp/1)
+pub const RE_ENUM: &str = r#"(?im)ENUM\((?P<values>.+)\)"#;
+/// A regex to extract enum values. [Example](https://regex101.com/r/2O8ZbK/1)
+pub const RE_ENUM_VALUES: &str = r#"(?im)/('|")?(?P<value>[^'"\n,]+)('|")?/gmi"#;
