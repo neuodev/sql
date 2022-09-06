@@ -60,42 +60,64 @@ impl<'a> Table<'a> {
     pub fn insert(&self, cols: SelectCols, values: Vec<Vec<String>>) -> TableResult<()> {
         Database::exists_or_err(self.db)?;
 
+        let schema = self.read_schema()?;
         let cols = match cols {
             SelectCols::Cols(cols) => cols,
-            SelectCols::All => self.read_schema()?.cols,
+            SelectCols::All => schema.cols.clone(),
         };
 
-        for row in &values {
+        let mut col_type_map = HashMap::new();
+        for col in &cols {
+            let col_pos = match schema.cols.iter().position(|c| c == col) {
+                Some(pos) => pos,
+                None => return Err(TableError::ColNotFound(col.to_string())),
+            };
+
+            let dtype = match schema.types.get(col_pos) {
+                Some(dtype) => dtype,
+                None => return Err(TableError::ColTypeNotFound(col.to_string())),
+            };
+
+            col_type_map.insert(col, dtype);
+        }
+
+        for (idx, row) in values.iter().enumerate() {
             if row.len() != cols.len() {
                 return Err(TableError::NumberMismatch(format!(
-                    "{} != {}",
+                    "[row = {}][{:?}] validation expr {} != {}",
+                    idx,
+                    row,
                     row.len(),
                     cols.len()
                 )));
             }
+
+            for (col, val) in cols.iter().zip(row) {
+                println!("col = {}, val={}, type = {:?}", col, val, col_type_map[col]);
+            }
         }
 
-        let new_entries = values
-            .into_iter()
-            .map(|row| {
-                let mut map = HashMap::new();
-                cols.iter().zip(row).for_each(|(k, v)| {
-                    map.insert(k.clone(), v);
-                });
+        // let new_entries = values
+        //     .into_iter()
+        //     .map(|row| {
+        //         let mut map = HashMap::new();
+        //         cols.iter().zip(row).for_each(|(k, v)| {
+        //             map.insert(k.clone(), v);
+        //         });
 
-                map
-            })
-            .collect::<Vec<HashMap<_, _>>>();
+        //         map
+        //     })
+        //     .collect::<Vec<HashMap<_, _>>>();
 
-        let mut all_entries = self.read()?;
-        all_entries.extend(new_entries);
-        println!(
-            "[{}@{}] {:?} entry",
-            self.table_name,
-            self.db,
-            all_entries.len()
-        );
-        self.write(&all_entries)?;
+        // let mut all_entries = self.read()?;
+        // all_entries.extend(new_entries);
+        // println!(
+        //     "[{}@{}] {:?} entry",
+        //     self.table_name,
+        //     self.db,
+        //     all_entries.len()
+        // );
+        // self.write(&all_entries)?;
         Ok(())
     }
 
@@ -149,7 +171,7 @@ impl<'a> Table<'a> {
             Some(pos) => match schema.types.get(pos) {
                 None => Err(TableError::ColTypeNotFound(col_name.into())),
                 Some(_) => {
-                    schema.types[pos] = datatype.as_string();
+                    schema.types[pos] = datatype;
                     self.write_schema(schema)?;
 
                     Ok(())
@@ -180,7 +202,7 @@ impl<'a> Table<'a> {
         // TODO: Add the new column to the data with the default value of this type
         let mut schema = self.read_schema()?;
         schema.cols.push(col_name.into());
-        schema.types.push(datatype.as_string());
+        schema.types.push(datatype);
 
         debug_assert_eq!(schema.cols.len(), schema.types.len());
         self.write_schema(schema)?;
@@ -283,5 +305,5 @@ impl<'a> Table<'a> {
 #[derive(Debug, Serialize, Deserialize)]
 struct Schema {
     cols: Vec<String>,
-    types: Vec<String>,
+    types: Vec<DataType>,
 }
