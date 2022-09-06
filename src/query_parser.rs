@@ -20,7 +20,7 @@ pub enum DatabaseAction {
 pub enum TableQuery {
     Create {
         cols: Vec<String>,
-        types: Vec<String>,
+        types: Vec<DataType>,
     },
     DropTable,
     Truncate,
@@ -119,10 +119,10 @@ impl QueryParser {
             let re_entries = Regex::new(RE_TABLE_ENTRIES).unwrap();
             let mut types = Vec::new();
             let mut cols = Vec::new();
-            re_entries.captures_iter(&caps["entries"]).for_each(|caps| {
-                types.push(caps["col_type"].to_string());
+            for caps in re_entries.captures_iter(&caps["entries"]) {
+                types.push(DataType::parse(&caps["col_type"])?);
                 cols.push(caps["col_name"].to_string())
-            });
+            }
 
             return Ok(Query::Table {
                 name: table_name,
@@ -347,12 +347,14 @@ mod tests {
         } = query
         {
             assert_eq!(name, "user".to_string());
-            assert_eq!(cols[0], "id".to_string());
-            assert_eq!(cols[1], "name".to_string());
-            assert_eq!(cols[2], "age".to_string());
-            assert_eq!(types[0], "int".to_string());
-            assert_eq!(types[1], "varchar".to_string());
-            assert_eq!(types[2], "int".to_string());
+            assert_eq!(
+                cols,
+                vec!["id".to_string(), "name".to_string(), "age".to_string()]
+            );
+            assert_eq!(
+                types,
+                vec![DataType::INT, DataType::VARCHAR(255), DataType::INT]
+            );
         } else {
             panic!("Unexpected query");
         }
@@ -361,10 +363,10 @@ mod tests {
     #[test]
     fn create_table_multi_line_query() {
         let query = QueryParser::parse(
-            r#"CREATE TABLE t_name (
-                column1 datatype1,
-                column2 datatype2,
-                column3 datatype3,
+            r#"CREATE TABLE blog (
+                id INT,
+                title VARCHAR(255),
+                body TEXT,
                );"#,
         )
         .unwrap();
@@ -373,13 +375,15 @@ mod tests {
             query: TableQuery::Create { cols, types },
         } = query
         {
-            assert_eq!(name, "t_name".to_string());
-            assert_eq!(cols[0], "column1".to_string());
-            assert_eq!(cols[1], "column2".to_string());
-            assert_eq!(cols[2], "column3".to_string());
-            assert_eq!(types[0], "datatype1".to_string());
-            assert_eq!(types[1], "datatype2".to_string());
-            assert_eq!(types[2], "datatype3".to_string());
+            assert_eq!(name, "blog".to_string());
+            assert_eq!(
+                cols,
+                vec!["id".to_string(), "title".to_string(), "body".to_string(),]
+            );
+            assert_eq!(
+                types,
+                vec![DataType::INT, DataType::VARCHAR(255), DataType::TEXT]
+            );
         } else {
             panic!("Unexpected query");
         }
