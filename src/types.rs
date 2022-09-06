@@ -12,6 +12,16 @@ pub enum DataTypesErr {
     InvalidType(String),
     #[error("Invalid varchar Type")]
     InvalidVarchar(#[from] ParseIntError),
+    #[error("Invalid number")]
+    InvalidInt(String),
+    #[error("Invalid float")]
+    InvalidFloat(String),
+    #[error("Invalid float")]
+    InvalidEnum(String),
+    #[error("Invalid boolean")]
+    InvalidBool(String),
+    #[error("Invalid string")]
+    InvalidStr(String),
 }
 
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -23,7 +33,7 @@ pub enum DataType {
     DEC,
     // String datatypes
     TEXT,
-    VARCHAR(u32),
+    VARCHAR(usize),
     ENUM(Vec<String>),
     BOOLEAN,
     BOOL,
@@ -38,7 +48,7 @@ impl DataType {
 
         if let Some(caps) = re_varchar.captures(dt) {
             let size = match caps.name("size") {
-                Some(_) => match caps["size"].parse::<u32>() {
+                Some(_) => match caps["size"].parse::<usize>() {
                     Ok(s) => s,
                     Err(e) => return Err(DataTypesErr::InvalidVarchar(e)),
                 },
@@ -75,6 +85,30 @@ impl DataType {
 
     pub fn as_string(&self) -> String {
         format!("{:?}", self)
+    }
+
+    pub fn is_valid(&self, raw: &str) -> Result<(), DataTypesErr> {
+        return match self {
+            DataType::INTEGER | DataType::INT if raw.parse::<i64>().is_err() => Err(
+                DataTypesErr::InvalidInt(format!("'{}' is not a valid {:?}", raw, self)),
+            ),
+            DataType::FLOAT | DataType::DEC if raw.parse::<f64>().is_err() => Err(
+                DataTypesErr::InvalidFloat(format!("'{}' is not a valid {:?}", raw, self)),
+            ),
+            DataType::VARCHAR(max_len) if &raw.len() > max_len => Err(DataTypesErr::InvalidStr(
+                format!("Max length exceed of `{}`. Max len = {}", raw, max_len),
+            )),
+            DataType::ENUM(values) if values.iter().position(|v| v == raw).is_none() => {
+                Err(DataTypesErr::InvalidEnum(format!(
+                    "`{}` is not valid enum. must be one of these {:?}",
+                    raw, values
+                )))
+            }
+            DataType::BOOLEAN | DataType::BOOL if raw.parse::<bool>().is_err() => Err(
+                DataTypesErr::InvalidBool(format!("`{}` is not a valid boolean", raw)),
+            ),
+            _ => Ok(()),
+        };
     }
 }
 
