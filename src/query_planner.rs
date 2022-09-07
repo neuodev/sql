@@ -81,7 +81,7 @@ impl QueryPlanner {
     }
 
     fn execute_query(raw_query: &str) -> Result<(), QueryPlannerError> {
-        let query = QueryParser::parse(raw_query)?;
+        let query = QueryParser::parse(raw_query.trim())?;
         match query {
             Query::Database { name, action } => match action {
                 DatabaseAction::Create => Database::new(&name)?,

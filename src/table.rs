@@ -107,7 +107,7 @@ impl<'a> Table<'a> {
         let mut all_entries = self.read()?;
         all_entries.extend(new_entries);
         println!(
-            "[{}@{}] {:?} entry",
+            "[{}@{}] {:?} entries",
             self.table_name,
             self.db,
             all_entries.len()
