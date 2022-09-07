@@ -451,7 +451,7 @@ mod tests {
     }
 
     #[test]
-    fn add_col() {
+    fn add_text_col() {
         let query = QueryParser::parse("ALTER TABLE demo ADD id TEXT").unwrap();
 
         if let Query::Table {
@@ -466,6 +466,23 @@ mod tests {
             panic!("Unexpted query")
         }
     }
+
+    // #[test]
+    // fn add_enum_col() {
+    //     let query = QueryParser::parse("ALTER TABLE user ADD type ENUM('ADMIN', 'USER');").unwrap();
+
+    //     if let Query::Table {
+    //         name,
+    //         query: TableQuery::AddCol { col_name, datatype },
+    //     } = query
+    //     {
+    //         assert_eq!(name, "user".to_string());
+    //         assert_eq!(col_name, "type".to_string());
+    //         assert_eq!(datatype, DataType::TEXT);
+    //     } else {
+    //         panic!("Unexpted query")
+    //     }
+    // }
 
     #[test]
     fn parse_select_statment_with_condition() {

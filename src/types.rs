@@ -24,7 +24,7 @@ pub enum DataTypesErr {
     InvalidStr(String),
 }
 
-#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub enum DataType {
     // Numeric datatypes
     INTEGER,
@@ -111,14 +111,16 @@ impl DataType {
         };
     }
 
-    fn default(&self) {
-        match self {
+    pub fn default(&self) -> String {
+        let res = match self {
             DataType::INTEGER | DataType::INT => "0",
             DataType::FLOAT | DataType::DEC => "0.0",
             DataType::TEXT | DataType::VARCHAR(_) => "",
             DataType::ENUM(val) => val[0].as_str(),
             DataType::BOOLEAN | DataType::BOOL => "false",
         };
+
+        res.to_string()
     }
 }
 

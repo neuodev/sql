@@ -209,8 +209,19 @@ impl<'a> Table<'a> {
             )))
         } else {
             schema.cols.push(col_name.into());
-            schema.types.push(datatype);
+            schema.types.push(datatype.clone());
 
+            let all_entries = self.read()?;
+            let new_entries = all_entries
+                .into_iter()
+                .map(|mut entry| {
+                    entry.insert(col_name.into(), datatype.default());
+
+                    entry
+                })
+                .collect::<Vec<HashMap<_, _>>>();
+
+            self.write(&new_entries)?;
             self.write_schema(schema)?;
             Ok(())
         }
