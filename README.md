@@ -106,3 +106,23 @@ WHERE condition;
 ```sql
 DELETE FROM table_name WHERE condition;
 ```
+
+## Supported Data Types
+
+```rs
+pub enum DataType {
+    // Numeric datatypes
+    INTEGER,
+    INT,
+    FLOAT,
+    DEC,
+    // String datatypes
+    TEXT,
+    VARCHAR(usize),
+    ENUM(Vec<String>),
+    // Bools
+    BOOLEAN,
+    BOOL,
+}
+
+```
