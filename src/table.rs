@@ -35,6 +35,8 @@ pub enum TableError {
     NumberMismatch(String),
     #[error("Types error")]
     TypeErr(#[from] DataTypesErr),
+    #[error("Column already exist")]
+    ColAlreadyExist(String),
 }
 
 type TableResult<T> = Result<T, TableError>;
@@ -196,12 +198,22 @@ impl<'a> Table<'a> {
         // todo: Every column should be unique
         // TODO: Add the new column to the data with the default value of this type
         let mut schema = self.read_schema()?;
-        schema.cols.push(col_name.into());
-        schema.types.push(datatype);
 
-        debug_assert_eq!(schema.cols.len(), schema.types.len());
-        self.write_schema(schema)?;
-        Ok(())
+        if self.col_exist(&schema, col_name) {
+            Err(TableError::ColAlreadyExist(col_name.into()))
+        } else if schema.cols.len() != schema.types.len() {
+            Err(TableError::NumberMismatch(format!(
+                "cols = {}, types = {}",
+                schema.cols.len(),
+                schema.types.len()
+            )))
+        } else {
+            schema.cols.push(col_name.into());
+            schema.types.push(datatype);
+
+            self.write_schema(schema)?;
+            Ok(())
+        }
     }
 
     pub fn remove_col<T: Into<String> + Copy>(&self, col_name: T) -> TableResult<()> {
@@ -293,6 +305,22 @@ impl<'a> Table<'a> {
                 Operator::GtEq => v >= value,
                 Operator::LtEq => v <= value,
             },
+        }
+    }
+
+    fn get_col_pos(&self, schema: &Schema, col_name: &str) -> Option<usize> {
+        schema.cols.iter().position(|c| c == col_name)
+    }
+
+    fn col_exist(&self, schema: &Schema, col_name: &str) -> bool {
+        self.get_col_pos(schema, col_name).is_some()
+    }
+
+    fn col_exist_or_err(&self, schema: &Schema, col_name: &str) -> TableResult<()> {
+        if !self.col_exist(schema, col_name) {
+            Err(TableError::ColNotFound(col_name.to_string()))
+        } else {
+            Ok(())
         }
     }
 }
