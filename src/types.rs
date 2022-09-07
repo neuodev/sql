@@ -110,6 +110,16 @@ impl DataType {
             _ => Ok(()),
         };
     }
+
+    fn default(&self) {
+        match self {
+            DataType::INTEGER | DataType::INT => "0",
+            DataType::FLOAT | DataType::DEC => "0.0",
+            DataType::TEXT | DataType::VARCHAR(_) => "",
+            DataType::ENUM(val) => val[0].as_str(),
+            DataType::BOOLEAN | DataType::BOOL => "false",
+        };
+    }
 }
 
 #[cfg(test)]
